@@ -45,7 +45,7 @@
         headers:
           Content-Type: application/json
           X-F5-Auth-Token: "{{auth.json.token.token}}"
-        body: "{{ lookup('template','j2/'+app_type+'.j2') }}"
+        body: "{{ lookup('template','templates/'+app_type+'.j2') }}"
         body_format: json
         timeout: 60
         status_code: 200, 202
