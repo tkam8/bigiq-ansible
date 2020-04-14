@@ -22,12 +22,6 @@
         userid: 2
       when: bigiq_user == 'paul'
 
-    - name: init with service account json
-      command: which python
-      register: python_path
-    - debug:
-        msg: "{{ python_path }}"
-
     - name: Create Tower Template
       tower_job_template:
         name: "NEW_AS3_APP"
