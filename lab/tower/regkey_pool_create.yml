@@ -1,0 +1,20 @@
+---
+- name: TOWER-AS3-BIG-IQ - REGKEY POOL
+  hosts: bigiq
+  connection: local
+  gather_facts: false
+
+  tasks:
+
+    - set_fact:
+        mgmt: "{{ hostvars[inventory_hostname]['mgmt_ip'] }}:{{ hostvars[inventory_hostname]['mgmt_port'] }}"
+
+    - name: Create a registration key (regkey) pool to hold individual device licenses
+      bigiq_regkey_pool:
+        name: "{{ regkey_pool_name }}"
+        state: present
+        provider: 
+          user: "{{ bigiq_user }}"
+          password: "{{ bigiq_pass }}"
+          server: "{{ mgmt }}"
+      delegate_to: localhost

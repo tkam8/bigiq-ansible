@@ -1,0 +1,55 @@
+---
+- name: TOWER-AS3-BIG-IQ - Onboard Tenant
+  hosts: bigiq
+  connection: local
+  gather_facts: false
+
+  tasks:
+
+    - set_fact:
+        mgmt: "{{ hostvars[inventory_hostname]['mgmt_ip'] }}:{{ hostvars[inventory_hostname]['mgmt_port'] }}"
+
+    - name: Authenticate to BIG-IQ
+      uri:
+        url: "https://{{ mgmt }}/mgmt/shared/authn/login"
+        method: POST
+        headers:
+          Content-Type: application/json
+        body:
+          username: "{{ bigiq_user }}"
+          password: "{{ bigiq_pass }}"
+          loginProviderName: RadiusServer
+        body_format: json
+        timeout: 60
+        status_code: 200, 202
+        validate_certs: false
+      register: auth
+
+    - name: Create a new user 
+      uri:
+        body: "{{ lookup('file', declaration_file_name) }}"
+        body_format: json
+        headers:
+          X-F5-Auth-Token: "{{ bigiq_auth_token }}"
+        method: POST
+        status_code: 200,202
+        url: "https://{{ mgmt }}/mgmt/shared/authz/users"
+        validate_certs: false
+        timeout: 60
+      register: user_status
+      delegate_to: localhost
+
+    - name: Add new user to existing role
+      uri:
+        body: "{{ lookup('file', declaration_file_name) }}"
+        body_format: json
+        headers:
+          X-F5-Auth-Token: "{{ bigiq_auth_token }}"
+        method: PATCH
+        status_code: 200,202
+        url: "https://{{ mgmt }}/mgmt/shared/authorization/roles/829b75bd-0f2b-38ed-8939-1ec517787586"
+        validate_certs: false
+        timeout: 60
+      register: user_status
+      delegate_to: localhost
+

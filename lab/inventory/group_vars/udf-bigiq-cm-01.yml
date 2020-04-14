@@ -1,0 +1,5 @@
+---
+bigiq_cm_server: 10.1.1.4
+# BOS-vBIGIP01.termmarc.com
+bigip_target_ip: 10.1.1.8
+as3_schemaVersion: 3.12.0
