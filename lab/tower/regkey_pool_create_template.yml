@@ -1,10 +1,10 @@
-- name: Create Tower Template
+- name: Create Regkey Pool Create Template
   hosts: tower
   connection: local
   gather_facts: false
 
   vars_prompt:
-  
+
     - name: template_name
       prompt: "Enter in the name of this template"
       private: no
@@ -28,15 +28,15 @@
         userid: 2
       when: bigiq_user == 'paul'
 
-    - name: Create Onboard Template
+    - name: Create Regkey Pool Create Template
       tower_job_template:
-        name: "ADD_BIGIQ_USER"
+        name: "CREATE_BIGIQ_REGKEY_POOL"
         job_type: "run"
         inventory: "F5Env"
         project: "NSSOL-DEMO"
-        playbook: "lab/tower/onboard_template.yml"
+        playbook: "lab/tower/regkey_pool_create.yml"
         survey_enabled: yes
-        survey_spec: "{{ lookup('template', 'j2/onboard_survey.j2') }}"
+        survey_spec: "{{ lookup('template', 'templates/regkey_pool_create_survey.j2') }}"
         tower_host: "{{ mgmt }}"
       register: template_out
 
@@ -48,7 +48,7 @@
         tower_host: "{{ mgmt }}"
 
     # Needed until Tower Module is updated
-    - name: Add Credentials to Tower Template
+    - name: Add Credentials to Regkey Pool Create Template
       uri:
         url: "https://{{ mgmt }}/api/v2/job_templates/{{ template_out.id }}/credentials/"
         method: POST

@@ -27,7 +27,7 @@
 
     - name: Create a new user 
       uri:
-        body: "{{ lookup('file', declaration_file_name) }}"
+        body: "{{ lookup('template', 'templates/user_create.j2') }}"
         body_format: json
         headers:
           X-F5-Auth-Token: "{{ bigiq_auth_token }}"
@@ -41,7 +41,7 @@
 
     - name: Add new user to existing role
       uri:
-        body: "{{ lookup('file', declaration_file_name) }}"
+        body: "{{ lookup('template', 'templates/role_associate.j2') }}"
         body_format: json
         headers:
           X-F5-Auth-Token: "{{ bigiq_auth_token }}"
@@ -53,3 +53,6 @@
       register: user_status
       delegate_to: localhost
 
+    # This variable will be used later on to add to list of users that can use the Tower Templates
+    - set_fact:
+        new_user: "{{ user_name }}"

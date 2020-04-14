@@ -24,13 +24,13 @@
 
     - name: Create Tower Template
       tower_job_template:
-        name: "{{ app_name }}"
+        name: "NEW_AS3_APP"
         job_type: "run"
         inventory: "F5Env"
-        project: "BIG-IQ-LAB"
-        playbook: "lab/f5-ansible-bigiq-as3-demo-7.0.0/tower/app_create.yml"
+        project: "NSSOL-DEMO"
+        playbook: "lab/tower/app_create.yml"
         survey_enabled: yes
-        survey_spec: "{{ lookup('template', 'j2/tower_survey.j2') }}"
+        survey_spec: "{{ lookup('template', 'templates/tower_survey.j2') }}"
         tower_host: "{{ mgmt }}"
       register: template_out
 
@@ -38,7 +38,7 @@
       tower_role:
         user: "{{ bigiq_user }}"
         role: execute
-        job_template: "{{ app_name }}"
+        job_template: "{{ template_name }}"
         tower_host: "{{ mgmt }}"
 
     # Needed until Tower Module is updated
