@@ -30,7 +30,7 @@
         body: "{{ lookup('template', 'templates/user_create.j2') }}"
         body_format: json
         headers:
-          X-F5-Auth-Token: "{{ bigiq_auth_token }}"
+          X-F5-Auth-Token: "{{ auth.json.token.token }}"
         method: POST
         status_code: 200,202
         url: "https://{{ mgmt }}/mgmt/shared/authz/users"
@@ -44,7 +44,7 @@
         body: "{{ lookup('template', 'templates/role_associate.j2') }}"
         body_format: json
         headers:
-          X-F5-Auth-Token: "{{ bigiq_auth_token }}"
+          X-F5-Auth-Token: "{{ auth.json.token.token }}"
         method: PATCH
         status_code: 200,202
         url: "https://{{ mgmt }}/mgmt/shared/authorization/roles/829b75bd-0f2b-38ed-8939-1ec517787586"
