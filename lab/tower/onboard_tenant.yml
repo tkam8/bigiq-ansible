@@ -39,18 +39,18 @@
       delegate_to: localhost
 
     - debug:
-        var: "{{ user_list }}"
+        var: user_list
     
     - debug:
-        var: "{{ user_name }}"
+        var: user_name
 
     - name: Get BIG-IQ user
       set_fact:
-        new_user_exists: "{{ item.new_user_name }}"
+        new_user_exists: "{{ item.name }}"
       with_items:
         "{{ user_list.items | json_query(query) }}"
       vars: 
-        query: "[].{name: new_user_name} | [?name=='{{ user_name }}']"
+        query: "[].{name: name} | [?name=='{{ user_name }}']"
 
     - debug:
         var: "{{ new_user_exists }}"
