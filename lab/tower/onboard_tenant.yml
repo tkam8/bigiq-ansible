@@ -50,7 +50,7 @@
       with_items:
         "{{ user_list.json.items | json_query(query) }}"
       vars: 
-        query: "[*].{name: name} | [?name=='{{ user_name }}']"
+        query: "[?name=='{{ user_name }}'].{name: name}"
 
     - debug:
         var: "{{ new_user_exists }}"
