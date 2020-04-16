@@ -47,7 +47,7 @@
           X-F5-Auth-Token: "{{ auth.json.token.token }}"
         method: PATCH
         status_code: 200,202
-        url: "https://{{ mgmt }}/mgmt/shared/authorization/roles/829b75bd-0f2b-38ed-8939-1ec517787586"
+        url: "https://{{ mgmt }}/mgmt/shared/authorization/roles/a11e7dd6-235d-38e8-b8a4-39995626e3ac"
         validate_certs: false
         timeout: 60
       register: user_status
