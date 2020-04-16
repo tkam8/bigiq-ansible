@@ -39,7 +39,7 @@
       delegate_to: localhost
       
     - set_fact:
-        new_user_exists: "{{ new_user.items | map(attribute='name') | map('regex_search','{{ user_name }}') | select('string') | list }}"
+        new_user_exists: "{{ new_user.items | map(attribute='name') | map('regex_search','user_name') | select('string') | list }}"
 
     - debug:
         msg: "{{ new_user_exists }}"
