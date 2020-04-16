@@ -35,14 +35,25 @@
         url: "https://{{ mgmt }}/mgmt/shared/authz/users"
         validate_certs: false
         timeout: 60
-      register: new_user
+      register: user_list
       delegate_to: localhost
-      
-    - set_fact:
-        new_user_exists: "{{ new_user.items | map(attribute='name') | map('regex_search','user_name') | select('string') | list }}"
 
     - debug:
-        msg: "{{ new_user_exists }}"
+        var: "{{ user_list }}"
+    
+    - debug:
+        var: "{{ user_name }}"
+
+    - name: Get BIG-IQ user
+      set_fact:
+        new_user_exists: "{{ item.new_user_name }}"
+      with_items:
+        "{{ user_list.items | json_query(query) }}"
+      vars: 
+        query: "[].{name: new_user_name} | [?name=='{{ user_name }}']"
+
+    - debug:
+        var: "{{ new_user_exists }}"
 
     - name: Create a new user 
       uri:
