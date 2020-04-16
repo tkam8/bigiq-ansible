@@ -31,7 +31,7 @@
         method: GET
         headers:
           Content-Type: application/json
-          X-F5-Auth-Token: "{{auth.json.token.token}}"
+          X-F5-Auth-Token: "{{ auth.json.token.token }}"
         validate_certs: false
       retries: 30
       delay: 5
