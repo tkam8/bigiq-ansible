@@ -48,7 +48,7 @@
       set_fact:
         new_user_exists: "{{ item.name }}"
       with_items:
-        "{{ user_list.items | json_query(query) }}"
+        "{{ user_list.json.items | json_query(query) }}"
       vars: 
         query: "[].{name: name} | [?name=='{{ user_name }}']"
 
