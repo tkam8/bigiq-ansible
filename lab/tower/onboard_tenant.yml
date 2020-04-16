@@ -25,6 +25,25 @@
         validate_certs: false
       register: auth
 
+    # Confirm existing list of BIG-IQ users
+    - name: Confirm existing BIG-IQ users 
+      uri:
+        headers:
+          X-F5-Auth-Token: "{{ auth.json.token.token }}"
+        method: GET
+        status_code: 200,202
+        url: "https://{{ mgmt }}/mgmt/shared/authz/users"
+        validate_certs: false
+        timeout: 60
+      register: new_user
+      delegate_to: localhost
+      
+    - set_fact:
+        new_user_exists: "{{ new_user.items | map(attribute='name') | map('regex_search','{{ user_name }}') | select('string') | list }}"
+
+    - debug:
+        msg: "{{ new_user_exists }}"
+
     - name: Create a new user 
       uri:
         body: "{{ lookup('template', 'templates/user_create.j2') }}"
@@ -38,6 +57,7 @@
         timeout: 60
       register: user_status
       delegate_to: localhost
+      when: new_user_exists is undefined
 
     - name: Add new user to existing role
       uri:
