@@ -6,9 +6,6 @@
 
   tasks:
 
-    - set_fact:
-        mgmt: "{{ hostvars[inventory_hostname]['mgmt_ip'] }}:{{ hostvars[inventory_hostname]['mgmt_port'] }}"
-
     - debug:
         var: regkey_pool_name 
 
