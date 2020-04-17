@@ -96,10 +96,13 @@
     - debug:
         var: bigip_facts
 
+    - debug:
+        var: bigip_facts.devices.active_modules
+
     # Check if active_modules exists, which indicates licensed status
-    - name: Filter for active modules, set to [] if not there
+    - name: Filter for active modules, set to null if not there
       set_fact:
-        bigip_license_status: "{{ bigip_facts | default({'active_modules':{}}) | json_query('devices.active_modules') }}"
+        bigip_license_status: "{{ bigip_facts | json_query('devices.active_modules') }}"
 
     - debug:
         var: bigip_license_status
