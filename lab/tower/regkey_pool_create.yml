@@ -9,6 +9,9 @@
     - set_fact:
         mgmt: "{{ hostvars[inventory_hostname]['mgmt_ip'] }}:{{ hostvars[inventory_hostname]['mgmt_port'] }}"
 
+    - debug:
+      var: "{{ regkey_pool_name }}"
+
     - name: Create a registration key (regkey) pool to hold individual device licenses
       bigiq_regkey_pool:
         name: "{{ regkey_pool_name }}"
