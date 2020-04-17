@@ -6,6 +6,26 @@
 
   tasks:
 
+    - set_fact:
+        mgmt: "{{ hostvars[inventory_hostname]['mgmt_ip'] }}:{{ hostvars[inventory_hostname]['mgmt_port'] }}"
+
+    # Get authentication token for uri module tasks below
+    - name: Authenticate to BIG-IQ
+      uri:
+        url: "https://{{ mgmt }}/mgmt/shared/authn/login"
+        method: POST
+        headers:
+          Content-Type: application/json
+        body:
+          username: "{{ bigiq_user }}"
+          password: "{{ bigiq_pass }}"
+          loginProviderName: local
+        body_format: json
+        timeout: 60
+        status_code: 200, 202
+        validate_certs: false
+      register: auth
+
     # By default, LTM is provisioned
     - set_fact:
         provisioned_modules: "[ 'ltm' ]"
@@ -23,79 +43,123 @@
           validate_certs: no
       delegate_to: localhost
 
-    # Next, license the BIG-IP
-    - name: Register a managed device, by name
-      bigiq_regkey_license_assignment:
-        pool: "{{ regkey_pool_name }}"
-        key: "{{ regkey }}"
-        device: "{{ bigip_name }}"
-        managed: yes
-        state: present
-        provider:
-          user: "{{ bigiq_user }}"
-          password: "{{ bigiq_pass }}"
-          server: "{{ hostvars[inventory_hostname]['mgmt_ip'] }}"
-          validate_certs: no
+    # Get list of regkey pools
+    - name: Get list of regkey pools
+      uri:
+        headers:
+          X-F5-Auth-Token: "{{ auth.json.token.token }}"
+        method: GET
+        status_code: 200,202
+        url: "https://{{ mgmt }}/mgmt/cm/device/licensing/pool/regkey/licenses"
+        validate_certs: false
+        timeout: 60
+      register: regkey_pool_list
       delegate_to: localhost
 
-    # Provision Requested modules
-    - name: Provision ASM at "nominal" level when requested
-      bigip_provision:
-        module: asm
-        level: nominal
-        provider:
-          server: "{{ bigip_mgmt }}"
-          user: "{{ bigip_user }}"
-          password: "{{ bigip_password }}"
-        validate_certs: no
-      delegate_to: localhost
-      register: provision_status
-      until: provision_status is success
-      delay: 10
-      retries: 20
-      when: provision_asm == "yes"
+    - debug:
+        var: regkey_pool_list
 
-    - name: Add ASM to list of modules to discover
+    - name: Get user defined regkey pool ID
       set_fact:
-        provisioned_modules: "{{ provisioned_modules + [asm] }}"
-      when: provision_asm == "yes"
+        regkey_pool_id: "{{ regkey_pool_list | json_query(query) }}"
+      vars: 
+        query: "json.items[?name=='{{ regkey_pool_name }}'].id"
 
-    - name: Debug provisioned_modules list
-      debug: var=provisioned_modules
-
-    - name: Provision DNS at "nominal" level when requested
-      bigip_provision:
-        module: dns
-        level: nominal
-        provider:
-          server: "{{ bigip_mgmt }}"
-          user: "{{ bigip_user }}"
-          password: "{{ bigip_password }}"
-        validate_certs: no
+    # Get all available regkey from user defined regkey pool
+    - name: Get an available regkey from user defined regkey pool
+      uri:
+        headers:
+          X-F5-Auth-Token: "{{ auth.json.token.token }}"
+        method: GET
+        status_code: 200,202
+        url: "https://{{ mgmt }}/mgmt/cm/device/licensing/pool/regkey/licenses/{{ regkey_pool_id }}/offerings"
+        validate_certs: false
+        timeout: 60
+      register: available_regkey_list
       delegate_to: localhost
-      register: provision_status
-      until: provision_status is success
-      delay: 10
-      retries: 20
-      when: provision_dns == "yes"
 
-    - name: Add ASM to list of modules to discover
+    - name: Get available regkey
       set_fact:
-        provisioned_modules: "{{ provisioned_modules + [dns] }}"
-      when: provision_dns == "yes"
+        available_regkey: "{{ available_regkey_list | json_query(query) }}"
+      vars: 
+        query: "json.items[?status=='READY'].regKey"
 
-    - name: Debug provisioned_modules list
-      debug: var=provisioned_modules
+    - debug:
+        var: available_regkey
 
-    # Import configuration
-    - name: Force full device rediscovery
-      bigiq_device_discovery:
-        device_address: "{{ bigip_mgmt }}"
-        modules: "{{ provisioned_modules }}"
-        force: yes
-        provider:
-          user: "{{ bigiq_user }}"
-          password: "{{ bigiq_pass }}"
-          server: "{{ hostvars[inventory_hostname]['mgmt_ip'] }}"
-          validate_certs: no
-      delegate_to: localhost
+    # # Next, license the BIG-IP
+    # - name: Register a managed device, by name
+    #   bigiq_regkey_license_assignment:
+    #     pool: "{{ regkey_pool_name }}"
+    #     key: "{{ regkey }}"
+    #     device: "{{ bigip_name }}"
+    #     managed: yes
+    #     state: present
+    #     provider:
+    #       user: "{{ bigiq_user }}"
+    #       password: "{{ bigiq_pass }}"
+    #       server: "{{ hostvars[inventory_hostname]['mgmt_ip'] }}"
+    #       validate_certs: no
+    #   delegate_to: localhost
+
+    # # Provision Requested modules
+    # - name: Provision ASM at "nominal" level when requested
+    #   bigip_provision:
+    #     module: asm
+    #     level: nominal
+    #     provider:
+    #       server: "{{ bigip_mgmt }}"
+    #       user: "{{ bigip_user }}"
+    #       password: "{{ bigip_password }}"
+    #     validate_certs: no
+    #   delegate_to: localhost
+    #   register: provision_status
+    #   until: provision_status is success
+    #   delay: 10
+    #   retries: 20
+    #   when: provision_asm == "yes"
+
+    # - name: Add ASM to list of modules to discover
+    #   set_fact:
+    #     provisioned_modules: "{{ provisioned_modules + [asm] }}"
+    #   when: provision_asm == "yes"
+
+    # - name: Debug provisioned_modules list
+    #   debug: var=provisioned_modules
+
+    # - name: Provision DNS at "nominal" level when requested
+    #   bigip_provision:
+    #     module: dns
+    #     level: nominal
+    #     provider:
+    #       server: "{{ bigip_mgmt }}"
+    #       user: "{{ bigip_user }}"
+    #       password: "{{ bigip_password }}"
+    #     validate_certs: no
+    #   delegate_to: localhost
+    #   register: provision_status
+    #   until: provision_status is success
+    #   delay: 10
+    #   retries: 20
+    #   when: provision_dns == "yes"
+
+    # - name: Add ASM to list of modules to discover
+    #   set_fact:
+    #     provisioned_modules: "{{ provisioned_modules + [dns] }}"
+    #   when: provision_dns == "yes"
+
+    # - name: Debug provisioned_modules list
+    #   debug: var=provisioned_modules
+
+    # # Import configuration
+    # - name: Force full device rediscovery
+    #   bigiq_device_discovery:
+    #     device_address: "{{ bigip_mgmt }}"
+    #     modules: "{{ provisioned_modules }}"
+    #     force: yes
+    #     provider:
+    #       user: "{{ bigiq_user }}"
+    #       password: "{{ bigiq_pass }}"
+    #       server: "{{ hostvars[inventory_hostname]['mgmt_ip'] }}"
+    #       validate_certs: no
+    #   delegate_to: localhost
