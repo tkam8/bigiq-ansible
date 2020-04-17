@@ -73,12 +73,12 @@
         query: "json.items[?status=='READY'].regKey"
 
     - debug:
-        var: available_regkey
+        var: available_regkeys
 
     # Do not proceed if no available regkeys
     - fail:
         msg: There are no available registration keys for activating BIG-IP. Please reclaim unused keys or contact your F5 Sales Representative for additional keys.
-      when: available_regkey | length == 0
+      when: available_regkeys | length == 0
 
     # Discover new BIG-IP
     - name: Discover a new BIG-IP device
@@ -98,7 +98,7 @@
     - name: Register a managed device, by name
       bigiq_regkey_license_assignment:
         pool: "{{ regkey_pool_name }}"
-        key: "{{ available_regkey[0] }}"
+        key: "{{ available_regkeys[0] }}"
         device: "{{ bigip_name }}"
         managed: yes
         state: present
