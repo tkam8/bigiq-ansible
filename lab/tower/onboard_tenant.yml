@@ -51,7 +51,7 @@
         query: "json.items[?name=='{{ user_name }}'].name"
 
     - debug:
-        var: "{{ new_user_exists }}"
+        var: new_user_exists 
 
     - name: Create a new user 
       uri:
