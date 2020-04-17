@@ -30,19 +30,6 @@
     - set_fact:
         provisioned_modules: "[ 'ltm' ]"
 
-    # First discover new BIG-IP
-    - name: Discover a new BIG-IP device
-      bigiq_device_discovery:
-        device_address: "{{ bigip_mgmt }}"
-        device_username: "{{ bigip_user }}"
-        device_password: "{{ bigip_password }}"
-        provider: 
-          user: "{{ bigiq_user }}"
-          password: "{{ bigiq_pass }}"
-          server: "{{ hostvars[inventory_hostname]['mgmt_ip'] }}"
-          validate_certs: no
-      delegate_to: localhost
-
     # Get list of regkey pools
     - name: Get list of regkey pools
       uri:
@@ -87,11 +74,25 @@
     - debug:
         var: available_regkey
 
+    # # Discover new BIG-IP
+    # - name: Discover a new BIG-IP device
+    #   bigiq_device_discovery:
+    #     device_address: "{{ bigip_mgmt }}"
+    #     device_username: "{{ bigip_user }}"
+    #     device_password: "{{ bigip_password }}"
+    #     modules: "{{ provisioned_modules }}"
+    #     provider: 
+    #       user: "{{ bigiq_user }}"
+    #       password: "{{ bigiq_pass }}"
+    #       server: "{{ hostvars[inventory_hostname]['mgmt_ip'] }}"
+    #       validate_certs: no
+    #   delegate_to: localhost
+
     # # Next, license the BIG-IP
     # - name: Register a managed device, by name
     #   bigiq_regkey_license_assignment:
     #     pool: "{{ regkey_pool_name }}"
-    #     key: "{{ regkey }}"
+    #     key: "{{ available_regkey }}"
     #     device: "{{ bigip_name }}"
     #     managed: yes
     #     state: present
