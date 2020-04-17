@@ -162,7 +162,7 @@
 
     - name: Add ASM to list of modules to discover
       set_fact:
-        provisioned_modules: "{{ provisioned_modules + [asm] }}"
+        provisioned_modules: "{{ provisioned_modules + ['asm'] }}"
       when: provision_asm == "yes"
 
     - name: Debug provisioned_modules list
@@ -186,7 +186,7 @@
 
     - name: Add ASM to list of modules to discover
       set_fact:
-        provisioned_modules: "{{ provisioned_modules + [dns] }}"
+        provisioned_modules: "{{ provisioned_modules + ['dns'] }}"
       when: provision_dns == "yes"
 
     - name: Debug provisioned_modules list
