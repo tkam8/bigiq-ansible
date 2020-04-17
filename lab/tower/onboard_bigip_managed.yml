@@ -68,7 +68,7 @@
     # Filter for only available regkeys
     - name: Filter for only available regkeys
       set_fact:
-        available_regkey: "{{ available_regkey_list | json_query(query) }}"
+        available_regkeys: "{{ available_regkey_list | json_query(query) }}"
       vars: 
         query: "json.items[?status=='READY'].regKey"
 
