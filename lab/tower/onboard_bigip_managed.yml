@@ -52,8 +52,8 @@
       vars: 
         query: "json.items[?name=='{{ regkey_pool_name }}'].id"
 
-    # Get all available regkey from user defined regkey pool
-    - name: Get an available regkey from user defined regkey pool
+    # Get all regkeys from user defined regkey pool
+    - name: Get all available regkeys from user defined regkey pool
       uri:
         headers:
           X-F5-Auth-Token: "{{ auth.json.token.token }}"
@@ -65,7 +65,8 @@
       register: available_regkey_list
       delegate_to: localhost
 
-    - name: Get available regkey
+    # Filter for only available regkeys
+    - name: Filter for only available regkeys
       set_fact:
         available_regkey: "{{ available_regkey_list | json_query(query) }}"
       vars: 
@@ -76,7 +77,7 @@
 
     # Do not proceed if no available regkeys
     - fail:
-        msg: There are no more available registration keys for BIG-IP. Please contact your F5 Admin.
+        msg: There are no available registration keys for activating BIG-IP. Please reclaim unused keys or contact your F5 Sales Representative for additional keys.
       when: available_regkey | length == 0
 
     # Discover new BIG-IP
