@@ -14,7 +14,7 @@
 
     - name: Create a registration key (regkey) pool to hold individual device licenses
       bigiq_regkey_pool:
-        name: "{{ regkey_pool_name }}"
+        name: regkey_pool_name
         state: present
         description: "NSSOL Regkey Pool"
         provider: 
