@@ -1,0 +1,101 @@
+---
+- name: TOWER-AS3-BIG-IQ - ONBOARD BIG-IP on BIG-IQ
+  hosts: bigiq
+  connection: local
+  gather_facts: false
+
+  tasks:
+
+    # By default, LTM is provisioned
+    - set_fact:
+        provisioned_modules: "[ 'ltm' ]"
+
+    # First discover new BIG-IP
+    - name: Discover a new BIG-IP device
+      bigiq_device_discovery:
+        device_address: "{{ bigip_mgmt }}"
+        device_username: "{{ bigip_user }}"
+        device_password: "{{ bigip_password }}"
+        provider: 
+          user: "{{ bigiq_user }}"
+          password: "{{ bigiq_pass }}"
+          server: "{{ hostvars[inventory_hostname]['mgmt_ip'] }}"
+          validate_certs: no
+      delegate_to: localhost
+
+    # Next, license the BIG-IP
+    - name: Register a managed device, by name
+      bigiq_regkey_license_assignment:
+        pool: "{{ regkey_pool_name }}"
+        key: "{{ regkey }}"
+        device: "{{ bigip_name }}"
+        managed: yes
+        state: present
+        provider:
+          user: "{{ bigiq_user }}"
+          password: "{{ bigiq_pass }}"
+          server: "{{ hostvars[inventory_hostname]['mgmt_ip'] }}"
+          validate_certs: no
+      delegate_to: localhost
+
+    # Provision Requested modules
+    - name: Provision ASM at "nominal" level when requested
+      bigip_provision:
+        module: asm
+        level: nominal
+        provider:
+          server: "{{ bigip_mgmt }}"
+          user: "{{ bigip_user }}"
+          password: "{{ bigip_password }}"
+        validate_certs: no
+      delegate_to: localhost
+      register: provision_status
+      until: provision_status is success
+      delay: 10
+      retries: 20
+      when: provision_asm == "yes"
+
+    - name: Add ASM to list of modules to discover
+      set_fact:
+        provisioned_modules: "{{ provisioned_modules + [asm] }}"
+      when: provision_asm == "yes"
+
+    - name: Debug provisioned_modules list
+      debug: var=provisioned_modules
+
+    - name: Provision DNS at "nominal" level when requested
+      bigip_provision:
+        module: dns
+        level: nominal
+        provider:
+          server: "{{ bigip_mgmt }}"
+          user: "{{ bigip_user }}"
+          password: "{{ bigip_password }}"
+        validate_certs: no
+      delegate_to: localhost
+      register: provision_status
+      until: provision_status is success
+      delay: 10
+      retries: 20
+      when: provision_dns == "yes"
+
+    - name: Add ASM to list of modules to discover
+      set_fact:
+        provisioned_modules: "{{ provisioned_modules + [dns] }}"
+      when: provision_dns == "yes"
+
+    - name: Debug provisioned_modules list
+      debug: var=provisioned_modules
+
+    # Import configuration
+    - name: Force full device rediscovery
+      bigiq_device_discovery:
+        device_address: "{{ bigip_mgmt }}"
+        modules: "{{ provisioned_modules }}"
+        force: yes
+        provider:
+          user: "{{ bigiq_user }}"
+          password: "{{ bigiq_pass }}"
+          server: "{{ hostvars[inventory_hostname]['mgmt_ip'] }}"
+          validate_certs: no
+      delegate_to: localhost

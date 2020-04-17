@@ -36,7 +36,7 @@
         project: "NSSOL-DEMO"
         playbook: "lab/tower/onboard_template.yml"
         survey_enabled: yes
-        survey_spec: "{{ lookup('template', 'j2/onboard_survey.j2') }}"
+        survey_spec: "{{ lookup('template', 'j2/onboard_bigiq_user_survey.j2') }}"
         tower_host: "{{ mgmt }}"
       register: template_out
 
