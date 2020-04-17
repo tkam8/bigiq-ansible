@@ -91,10 +91,18 @@
           password: "{{ bigip_password }}"
           validate_certs: no
       delegate_to: localhost
-      register: bigip_status
+      register: bigip_facts
 
     - debug:
-        var: bigip_status
+        var: bigip_facts
+
+    # Check if active_modules exists, which indicates licensed status
+    - name: Filter for active modules, set to [] if not there
+      set_fact:
+        bigip_license_status: "{{ bigip_facts | default({'active_modules':{}}) | json_query('devices.active_modules') }}"
+
+    - debug:
+        var: bigip_license_status
 
     # This doesn't seem to work
     # # Example to get an available key:https://github.com/ansible/ansible_collections_f5/blob/master/plugins/lookup/bigiq_license.py
@@ -133,6 +141,7 @@
     #       server: "{{ hostvars[inventory_hostname]['mgmt_ip'] }}"
     #       validate_certs: no
     #   delegate_to: localhost
+    #   when: 
 
     # # Provision Requested modules
     # - name: Provision ASM at "nominal" level when requested
