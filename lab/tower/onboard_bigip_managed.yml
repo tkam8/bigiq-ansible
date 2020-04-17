@@ -96,13 +96,14 @@
     - debug:
         var: bigip_status
 
-    # Example to get an availalbe key
-    - name: Get a regkey license from a license pool
-      bigiq_regkey_license:
-        key: "{{ lookup('bigiq_license', pool_name={{ regkey_pool_name }}, username={{ bigiq_user }}, password={{ bigiq_pass }}, host={{ hostvars[inventory_hostname]['mgmt_ip'] }}, port=443}}"
-        state: present
-        pool: "{{ regkey_pool_name }}"
-      register: available_key_test
+    # This doesn't seem to work
+    # # Example to get an available key:https://github.com/ansible/ansible_collections_f5/blob/master/plugins/lookup/bigiq_license.py
+    # - name: Get a regkey license from a license pool
+    #   bigiq_regkey_license:
+    #     key: "{{ lookup('bigiq_license', pool_name={{ regkey_pool_name }}, username={{ bigiq_user }}, password={{ bigiq_pass }}, host={{ hostvars[inventory_hostname]['mgmt_ip'] }}, port=443}}"
+    #     state: present
+    #     pool: "{{ regkey_pool_name }}"
+    #   register: available_key_test
 
     # # Discover new BIG-IP
     # - name: Discover a new BIG-IP device
