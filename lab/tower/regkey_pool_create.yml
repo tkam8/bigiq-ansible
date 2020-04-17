@@ -20,6 +20,6 @@
         provider: 
           user: "{{ bigiq_user }}"
           password: "{{ bigiq_pass }}"
-          server: "https://{{ mgmt }}"
+          server: "{{ hostvars[inventory_hostname]['mgmt_ip'] }}"
           validate_certs: no
       delegate_to: localhost
