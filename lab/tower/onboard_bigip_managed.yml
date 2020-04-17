@@ -82,7 +82,7 @@
 
     # Check whether BIG-IP is already licensed
     - name: Collect BIG-IP information
-      bigip_device_info:
+      bigip_device_facts:
         gather_subset:
           - devices
         provider:
