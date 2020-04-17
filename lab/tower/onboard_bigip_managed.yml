@@ -48,7 +48,7 @@
 
     - name: Get user defined regkey pool ID
       set_fact:
-        regkey_pool_id: "{{ regkey_pool_list | json_query(query) }}"
+        regkey_pool_id: "{{ regkey_pool_list | json_query(query) | join(" ") }}"
       vars: 
         query: "json.items[?name=='{{ regkey_pool_name }}'].id"
 
@@ -67,7 +67,7 @@
 
     - name: Get available regkey
       set_fact:
-        available_regkey: "{{ available_regkey_list | json_query(query) }}"
+        available_regkey: "{{ available_regkey_list | json_query(query) | join(" ") }}"
       vars: 
         query: "json.items[?status=='READY'].regKey"
 
