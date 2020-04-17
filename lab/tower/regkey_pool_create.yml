@@ -18,5 +18,5 @@
           user: "{{ bigiq_user }}"
           password: "{{ bigiq_pass }}"
           server: "{{ mgmt }}"
-        validate_certs: no
+          validate_certs: no
       delegate_to: localhost
