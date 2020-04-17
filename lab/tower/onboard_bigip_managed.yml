@@ -28,7 +28,7 @@
 
     # By default, LTM is provisioned, so adding to the list of modules to discover when registering on BIG-IQ. 
     - set_fact:
-        provisioned_modules: "[ 'ltm' ]"
+        provisioned_modules: ['ltm']
 
     # Get list of regkey pools
     - name: Get list of regkey pools
@@ -102,7 +102,7 @@
     # Check if active_modules exists, which indicates licensed status
     - name: Filter for active modules, set to null if not there
       set_fact:
-        bigip_license_status: "{{ bigip_facts | json_query('devices.active_modules') }}"
+        bigip_license_status: "{{ bigip_facts | json_query('devices[0].active_modules') }}"
 
     - debug:
         var: bigip_license_status
