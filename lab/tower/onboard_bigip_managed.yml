@@ -165,7 +165,7 @@
 
     - name: Add ASM to list of modules to discover
       set_fact:
-        provisioned_modules: "{{ provisioned_modules + ['asm'] + ['shared_security']}}"
+        provisioned_modules: "{{ provisioned_modules + ['asm'] + ['security_shared']}}"
       when: provision_asm == "yes"
 
     - name: Debug provisioned_modules list
