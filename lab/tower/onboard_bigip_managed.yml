@@ -97,7 +97,7 @@
         var: bigip_facts
 
     - debug:
-        var: bigip_facts.devices.active_modules
+        var: bigip_facts.devices[0].active_modules
 
     # Check if active_modules exists, which indicates licensed status
     - name: Filter for active modules, set to null if not there
@@ -115,6 +115,9 @@
     #     state: present
     #     pool: "{{ regkey_pool_name }}"
     #   register: available_key_test
+
+    - debug:
+        var: bigip_facts.devices[0].hostname
 
     # Discover new BIG-IP
     - name: Discover a new BIG-IP device
@@ -135,7 +138,7 @@
       bigiq_regkey_license_assignment:
         pool: "{{ regkey_pool_name }}"
         key: "{{ available_regkeys[0] }}"
-        device: "{{ bigip_facts.devices.hostname }}"
+        device: "{{ bigip_facts.devices[0].hostname }}"
         managed: yes
         state: present
         provider:
