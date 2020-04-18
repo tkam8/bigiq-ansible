@@ -43,8 +43,8 @@
       register: regkey_pool_list
       delegate_to: localhost
 
-    - debug:
-        var: regkey_pool_list
+    # - debug:
+    #     var: regkey_pool_list
 
     - name: Get user defined regkey pool ID
       set_fact:
@@ -72,8 +72,8 @@
       vars: 
         query: "json.items[?status=='READY'].regKey"
 
-    - debug:
-        var: available_regkeys
+    # - debug:
+    #     var: available_regkeys
 
     # Do not proceed if no available regkeys
     - fail:
@@ -93,32 +93,23 @@
       delegate_to: localhost
       register: bigip_facts
 
-    - debug:
-        var: bigip_facts
+    # - debug:
+    #     var: bigip_facts
 
-    - debug:
-        var: bigip_facts.devices[0].active_modules
+    # - debug:
+    #     var: bigip_facts.devices[0].active_modules
 
     # Check if active_modules exists, which indicates licensed status
     - name: Filter for active modules, set to null if not there
       set_fact:
         bigip_license_status: "{{ bigip_facts | json_query('devices[0].active_modules') }}"
 
-    - debug:
-        var: bigip_license_status
+    # - debug:
+    #     var: bigip_license_status
 
-    # This doesn't seem to work
-    # # Example to get an available key:https://github.com/ansible/ansible_collections_f5/blob/master/plugins/lookup/bigiq_license.py
-    # - name: Get a regkey license from a license pool
-    #   bigiq_regkey_license:
-    #     key: "{{ lookup('bigiq_license', pool_name={{ regkey_pool_name }}, username={{ bigiq_user }}, password={{ bigiq_pass }}, host={{ hostvars[inventory_hostname]['mgmt_ip'] }}, port=443}}"
-    #     state: present
-    #     pool: "{{ regkey_pool_name }}"
-    #   register: available_key_test
-
-    # Double check that we are getting the hostname used in the license assignment task
-    - debug:
-        var: bigip_facts.devices[0].hostname
+    # # Double check that we are getting the hostname used in the license assignment task
+    # - debug:
+    #     var: bigip_facts.devices[0].hostname
 
     # Discover new BIG-IP
     - name: Discover a new BIG-IP device
@@ -167,6 +158,7 @@
       retries: 20
       when: provision_asm == "yes"
 
+    # Note that security_shared is also required here
     - name: Add ASM to list of modules to discover
       set_fact:
         provisioned_modules: "{{ provisioned_modules + ['asm'] + ['security_shared']}}"
@@ -175,7 +167,7 @@
     - name: Debug provisioned_modules list
       debug: var=provisioned_modules
 
-    # Note that the module name is still gtm
+    # Note that the module name is gtm in the bigip_provision module
     - name: Provision DNS at "nominal" level when requested
       bigip_provision:
         module: gtm
@@ -192,7 +184,7 @@
       retries: 20
       when: provision_dns == "yes"
 
-    # Note the accepted module choice for dns is "dns"
+    # Note the accepted module choice for dns is "dns" in the bigiq_device_discovery module
     - name: Add DNS to list of modules to discover
       set_fact:
         provisioned_modules: "{{ provisioned_modules + ['dns'] }}"
