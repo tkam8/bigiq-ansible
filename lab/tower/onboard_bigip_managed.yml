@@ -116,6 +116,7 @@
     #     pool: "{{ regkey_pool_name }}"
     #   register: available_key_test
 
+    # Double check that we are getting the hostname used in the license assignment task
     - debug:
         var: bigip_facts.devices[0].hostname
 
@@ -200,7 +201,7 @@
     - name: Debug provisioned_modules list
       debug: var=provisioned_modules
 
-    # Import configuration
+    # Import configuration, use retries becausethis may fail the first two times if licensing is occurring
     - name: Force full device rediscovery
       bigiq_device_discovery:
         device_address: "{{ bigip_mgmt }}"
