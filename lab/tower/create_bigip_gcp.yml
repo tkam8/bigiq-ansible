@@ -58,7 +58,7 @@
     - name: create a disk
       gcp_compute_disk:
           name: '{{ resource_prefix }}-disk-instance'
-          size_gb: 50
+          size_gb: 80
           source_image: 'projects/f5-7626-networks-public/global/images/f5-hourly-bigip-14-1-0-1-0-0-7-best-200mbps'
           zone: "{{ gcp_zone }}"
           project: "{{ GCE_PROJECT }}"
