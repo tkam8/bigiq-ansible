@@ -1,0 +1,57 @@
+---
+- name: Delete an instance
+  hosts: localhost
+  gather_facts: no
+
+  tasks:
+
+    - name: delete an instance
+      gcp_compute_instance:
+          state: absent
+          name: bigiq-lab-bigip-instance
+          zone: "{{ gcp_zone }}"
+          project: "{{ GCE_PROJECT }}"
+          auth_kind: serviceaccount
+          service_account_file: "{{ GCE_CREDENTIALS_FILE_PATH }}"
+
+    - name: delete an address
+      gcp_compute_address:
+          state: absent
+          name: 'bigiq-lab-address-instance'
+          region: "{{ gcp_region }}"
+          project: "{{ GCE_PROJECT }}"
+          auth_kind: serviceaccount
+          service_account_file: "{{ GCE_CREDENTIALS_FILE_PATH }}"
+
+    - name: delete a firewall
+      gcp_compute_firewall:
+        name: bigiq-lab-firewall
+        network: "projects/{{ GCE_PROJECT }}/global/networks/{{ network.name }}"
+        project: "{{ GCE_PROJECT }}"
+        state: absent
+
+    - name: delete a subnetwork
+      gcp_compute_subnetwork:
+        name: bigiq-lab-subnet
+        region: "{{ gcp_region }}"
+        project: "{{ GCE_PROJECT }}"
+        state: absent
+
+    - name: delete a network
+      gcp_compute_network:
+          name: 'bigiq-lab-network-instance'
+          project: "{{ GCE_PROJECT }}"
+          auth_kind: serviceaccount
+          service_account_file: "{{ GCE_CREDENTIALS_FILE_PATH }}"
+          state: absent
+
+
+
+
+
+
+
+
+
+
+

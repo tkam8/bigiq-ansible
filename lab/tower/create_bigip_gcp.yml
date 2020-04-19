@@ -32,7 +32,7 @@
         network: "projects/{{ GCE_PROJECT }}/global/networks/{{ network.name }}"
         allowed:
         - ip_protocol: tcp
-          ports: ['80','22','443's]
+          ports: ['80','22','443']
         target_tags:
           - bigiq-lab
         source_ranges: ['0.0.0.0/0']
