@@ -4,57 +4,47 @@
   gather_facts: no
   vars:
     GCE_PROJECT: "{{ lookup('env', 'GCE_PROJECT') }}"
-    GCE_CREDENTIALS_FILE_PATH: "{{ lookup('env', 'GCE_CREDENTIALS_FILE_PATH') }}"  
+    GCE_CREDENTIALS_FILE_PATH: "{{ lookup('env', 'GCE_CREDENTIALS_FILE_PATH') }}"
+    GCE_EMAIL: "{{ lookup('env', 'GCE_EMAIL') }}"
+    resource_prefix: "bigiq-lab"
 
   tasks:
 
-    - name: delete an instance
-      gcp_compute_instance:
-          state: absent
-          name: bigiq-lab-bigip-instance
-          zone: "{{ gcp_zone }}"
-          project: "{{ GCE_PROJECT }}"
-          auth_kind: serviceaccount
-          service_account_file: "{{ GCE_CREDENTIALS_FILE_PATH }}"
+    - name: Delete Custom Network
+      gce_net:
+        name: "{{ resource_prefix }}-network-instance"
+        mode: custom
+        credentials_file: "{{ GCE_CREDENTIALS_FILE_PATH }}"
+        service_account_email: "{{ GCE_EMAIL }}"
+        subnet_name: bigiq-lab-subnet
+        subnet_region: "{{ gcp_region }}"
+        ipv4_range: "{{ ip_cidr_range }}"
+        state: absent
+      register: gce_network
 
-    - name: delete an address
+    - name: Open SSH and HTTPS ports in the GCE firewall
+      gce_net:
+        name: "{{ resource_prefix }}-network-instance"
+        fwname: "fw-{{ resource_prefix }}-ssh-https"
+        state: absent
+        service_account_email: "{{ GCE_EMAIL }}"
+        credentials_file: "{{ GCE_CREDENTIALS_FILE_PATH }}"
+        project_id: "{{ GCE_PROJECT }}"
+
+    - name: Delete an address
       gcp_compute_address:
-          state: absent
-          name: 'bigiq-lab-address-instance'
+          name: '{{ resource_prefix }}-address-instance'
           region: "{{ gcp_region }}"
           project: "{{ GCE_PROJECT }}"
           auth_kind: serviceaccount
           service_account_file: "{{ GCE_CREDENTIALS_FILE_PATH }}"
+          state: absent
 
-    - name: delete a firewall
-      gcp_compute_firewall:
-        name: bigiq-lab-firewall
-        network: "projects/{{ GCE_PROJECT }}/global/networks/{{ network.name }}"
-        project: "{{ GCE_PROJECT }}"
-        state: absent
-
-    - name: delete a subnetwork
-      gcp_compute_subnetwork:
-        name: bigiq-lab-subnet
-        region: "{{ gcp_region }}"
-        project: "{{ GCE_PROJECT }}"
-        state: absent
-
-    - name: delete a network
-      gcp_compute_network:
-          name: 'bigiq-lab-network-instance'
+    - name: Delete an instance
+      gcp_compute_instance:
+          state: absent
+          name: '{{ resource_prefix }}-bigip-instance'
+          zone: "{{ gcp_zone }}"
           project: "{{ GCE_PROJECT }}"
           auth_kind: serviceaccount
           service_account_file: "{{ GCE_CREDENTIALS_FILE_PATH }}"
-          state: absent
-
-
-
-
-
-
-
-
-
-
-
