@@ -2,6 +2,9 @@
 - name: Create an instance
   hosts: localhost
   gather_facts: no
+  vars:
+    GCE_PROJECT: "{{ lookup('env', 'GCE_PROJECT') }}"
+    GCE_CREDENTIALS_FILE_PATH: "{{ lookup('env', 'GCE_CREDENTIALS_FILE_PATH') }}"
 
   tasks:
 
