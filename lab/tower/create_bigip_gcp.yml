@@ -90,9 +90,11 @@
           service_account_file: "{{ GCE_CREDENTIALS_FILE_PATH }}"
           scopes:
             - https://www.googleapis.com/auth/compute
+          metadata:
+            enable-oslogin: "FALSE"
           tags:
-          items:
-            - bigiq-lab
+            items:
+              - bigiq-lab
       register: instance
 
     - name: Wait for SSH to come up
