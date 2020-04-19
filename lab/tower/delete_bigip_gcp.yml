@@ -18,7 +18,6 @@
         service_account_email: "{{ GCE_EMAIL }}"
         subnet_name: bigiq-lab-subnet
         subnet_region: "{{ gcp_region }}"
-        ipv4_range: "{{ ip_cidr_range }}"
         state: absent
       register: gce_network
 
