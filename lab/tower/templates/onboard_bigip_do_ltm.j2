@@ -1,0 +1,38 @@
+{
+    "class": "DO",
+    "declaration": {
+            "schemaVersion": "1.5.0",
+            "class": "Device",
+            "async": true,
+            "Common": {
+                    "class": "Tenant",
+                    "myLicense": {
+                        "class": "License",
+                        "licenseType": "licensePool",
+                        "bigIqHost": "{{ hostvars[inventory_hostname]['mgmt_ip'] }}",
+                        "bigIqUsername": "{{ bigiq_user }}",
+                        "bigIqPassword": "{{ bigiq_pass }}",
+                        "licensePool": "{{ regkey_pool_name }}",
+                        "reachable": true,
+                        "bigIpUsername": "{{ bigip_user }}",
+                        "bigIpPassword": "{{ bigip_password }}"
+                    },
+                    "myProvision": {
+                            "class": "Provision",
+                            "ltm": "nominal",
+                            "gtm": "nominal"
+                    }
+                    "admin": {
+                            "class": "User",
+                            "userType": "regular",
+                            "partitionAccess": {
+                                    "all-partitions": {
+                                            "role": "admin"
+                                    }
+                            },
+                            "shell": "tmsh",
+                            "password": "{{ bigip_password }}"
+                    }
+            }
+    }
+}

@@ -1,0 +1,52 @@
+{
+    "description": "",
+    "name": "",
+    "spec": [
+        {
+            "required": true,
+            "min": 0,
+            "default": "admin",
+            "max": 1024,
+            "question_description": "",
+            "choices": "",
+            "new_question": true,
+            "variable": "bigip_user",
+            "question_name": "BIG-IP username",
+            "type": "text"
+        },
+        {
+            "required": true,
+            "min": 0,
+            "default": "strongPassword",
+            "max": 1024,
+            "question_description": "",
+            "choices": "",
+            "new_question": true,
+            "variable": "bigip_password",
+            "question_name": "BIG-IP Password",
+            "type": "text"
+        },
+        {
+            "required": true,
+            "min": 0,
+            "default": "",
+            "max": 1024,
+            "question_description": "",
+            "choices": "",
+            "variable": "regkey_pool_name",
+            "question_name": "Registration Key Pool Name",
+            "type": "text"
+        },
+        {
+            "required": true,
+            "min": 0,
+            "default": "null",
+            "max": 1024,
+            "question_description": "",
+            "choices": "",
+            "variable": "requested_modules",
+            "question_name": "Type "asm" to provision F5 WAF, leave "null" if not needed",
+            "type": "text"
+        }
+    ]
+}

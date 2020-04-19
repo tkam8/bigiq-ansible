@@ -1,0 +1,5 @@
+---
+
+# Official galaxy role for F5 automation tool chain (https://galaxy.ansible.com/f5devcentral/atc_deploy)
+- name: atc_deploy
+  src: https://github.com/f5devcentral/ansible-role-f5_atc_deploy_declaration
