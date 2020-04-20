@@ -7,6 +7,12 @@
     GCE_PROJECT: "{{ lookup('env', 'GCE_PROJECT') }}"
     GCE_CREDENTIALS_FILE_PATH: "{{ lookup('env', 'GCE_CREDENTIALS_FILE_PATH') }}"
     GCE_EMAIL: "{{ lookup('env', 'GCE_EMAIL') }}"
+    onboard_log: "/var/log/startup-script.log"
+    libs_dir: "/config/cloud/google"
+    AS3_URL: "https://github.com/F5Networks/f5-appsvcs-extension/releases/download/v3.16.0/f5-appsvcs-3.16.0-6.noarch.rpm"
+    DO_URL: "https://github.com/F5Networks/f5-declarative-onboarding/releases/download/v1.9.0/f5-declarative-onboarding-1.9.0-1.noarch.rpm"
+    TS_URL: "https://github.com/F5Networks/f5-telemetry-streaming/releases/download/v1.8.0/f5-telemetry-1.8.0-1.noarch.rpm"
+    BIGIP_PASS: "{{ bigip_password }}"
 
   tasks:
     # First download galaxy roles for F5 ATC
@@ -44,6 +50,7 @@
             ports:
               - '22'
               - '443'
+              - '8443'
           - ip_protocol: icmp
         network: "{{ gce_network }}"
         direction: INGRESS
@@ -56,14 +63,14 @@
 
     - name: create an address
       gcp_compute_address:
-          name: '{{ resource_prefix }}-address-instance'
-          region: "{{ gcp_region }}"
-          project: "{{ GCE_PROJECT }}"
-          auth_kind: serviceaccount
-          service_account_file: "{{ GCE_CREDENTIALS_FILE_PATH }}"
-          scopes:
-            - https://www.googleapis.com/auth/compute
-          state: present
+        name: '{{ resource_prefix }}-address-instance'
+        region: "{{ gcp_region }}"
+        project: "{{ GCE_PROJECT }}"
+        auth_kind: serviceaccount
+        service_account_file: "{{ GCE_CREDENTIALS_FILE_PATH }}"
+        scopes:
+          - https://www.googleapis.com/auth/compute
+        state: present
       register: address
 
     # - name: Debug address
@@ -75,16 +82,16 @@
 
     - name: create a disk
       gcp_compute_disk:
-          name: '{{ resource_prefix }}-disk-instance'
-          size_gb: 80
-          source_image: 'projects/f5-7626-networks-public/global/images/f5-hourly-bigip-14-1-0-1-0-0-7-best-200mbps'
-          zone: "{{ gcp_zone }}"
-          project: "{{ GCE_PROJECT }}"
-          auth_kind: serviceaccount
-          service_account_file: "{{ GCE_CREDENTIALS_FILE_PATH }}"
-          scopes:
-            - https://www.googleapis.com/auth/compute
-          state: present
+        name: '{{ resource_prefix }}-disk-instance'
+        size_gb: 80
+        source_image: 'projects/f5-7626-networks-public/global/images/f5-bigip-14-1-2-3-0-0-5-byol-all-modules-1boot-loc-19121814223'
+        zone: "{{ gcp_zone }}"
+        project: "{{ GCE_PROJECT }}"
+        auth_kind: serviceaccount
+        service_account_file: "{{ GCE_CREDENTIALS_FILE_PATH }}"
+        scopes:
+          - https://www.googleapis.com/auth/compute
+        state: present
       register: disk
 
     - name: create an instance
@@ -110,6 +117,7 @@
             - https://www.googleapis.com/auth/compute
           metadata:
             enable-oslogin: "FALSE"
+            startup-script: "{{ lookup('template', 'templates/f5_onboard.j2') }}"
           tags:
             items:
               - bigiq-lab
@@ -129,7 +137,7 @@
       set_fact:
         provider_atc: 
           server: "{{ bigip_mgmt }}"
-          server_port: 443
+          server_port: 8443
           user: "{{ bigip_user }}"
           password: "{{ bigip_password }}"
           validate_certs: false
