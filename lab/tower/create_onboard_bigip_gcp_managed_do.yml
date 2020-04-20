@@ -33,8 +33,8 @@
         state: present
       register: gce_network
 
-    - name: Debug network
-      debug: var=gce_network
+    # - name: Debug network
+    #   debug: var=gce_network
 
     - name: get info on the network (selfLink)
       gcp_compute_network_facts:
@@ -45,8 +45,8 @@
         service_account_file:  "{{ GCE_CREDENTIALS_FILE_PATH }}"
       register: gce_network_info
 
-    - name: Debug network info
-      debug: var=gce_network_info
+    # - name: Debug network info
+    #   debug: var=gce_network_info
 
     - name: Open SSH and HTTPS ports in the GCE firewall
       gce_net:
@@ -73,8 +73,8 @@
           state: present
       register: address
 
-    - name: Debug address
-      debug: var=address
+    # - name: Debug address
+    #   debug: var=address
 
     - name: Set address as var
       set_fact:
@@ -104,7 +104,7 @@
               boot: true
               source: "{{ disk }}"
           network_interfaces:
-              - network: "{{ gce_network.name }}"
+              - network: "{{ gce_network_info.selfLink }}"
                 access_configs:
                   - name: 'External NAT'
                     nat_ip: "{{ address }}"
