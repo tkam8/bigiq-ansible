@@ -1,6 +1,0 @@
----
-
-roles:
-  # Install a role from Ansible Galaxy.
-  # Official galaxy role for F5 automation tool chain (https://galaxy.ansible.com/f5devcentral/atc_deploy)
-  - src: f5devcentral.atc_deploy
