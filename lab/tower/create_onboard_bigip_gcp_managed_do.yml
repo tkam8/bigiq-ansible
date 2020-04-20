@@ -57,7 +57,7 @@
 
     - name: Set address as var
       set_fact:
-        bigip_mgmt: address.address
+        bigip_mgmt: "{{ address.address }}"
 
     - name: create a disk
       gcp_compute_disk:
