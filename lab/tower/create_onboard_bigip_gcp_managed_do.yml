@@ -55,8 +55,7 @@
 
     - name: Create selfLink dict for later
       set_fact: 
-        gce_network_selfLink: 
-          - selfLink:"{{ gce_network_info['items'][0]['selfLink'] }}"
+        gce_network_selfLink: "selfLink:{{ gce_network_info['items'][0]['selfLink'] }}"
 
     - name: Open SSH and HTTPS ports in the GCE firewall
       gce_net:
