@@ -33,6 +33,9 @@
         state: present
       register: gce_network
 
+    - name: Debug network
+      debug: var=gce_network
+
     - name: Open SSH and HTTPS ports in the GCE firewall
       gce_net:
         name: "{{ resource_prefix }}-network-instance"
