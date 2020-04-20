@@ -37,7 +37,7 @@
       debug: var=gce_network
 
     - name: get info on the network (selfLink)
-      gcp_compute_network_info:
+      gcp_compute_network_facts:
         filters:
         - name = "{{ gce_network.name }}"
         project: "{{ GCE_PROJECT }}"
