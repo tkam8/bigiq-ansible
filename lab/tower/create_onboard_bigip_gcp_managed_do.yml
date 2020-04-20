@@ -161,7 +161,7 @@
         provider: "{{ provider_atc }}"
         atc_service: Device
         atc_method: POST
-        atc_declaration_file: "{{ lookup('template', 'files/onboard_bigip_do_{{ item.atc_declaration_file }}.json') }}"
+        atc_declaration_file: "{{ lookup('file', 'files/onboard_bigip_do_{{ item.atc_declaration_file }}.json') }}"
         atc_delay: 10
         atc_retries: 10
       when: "{{ requested_modules == item.when }}"
