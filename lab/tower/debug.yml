@@ -7,6 +7,14 @@
 
   tasks:
 
-    - name: Debug project path
+    - name: Debug ansible_parent_role_paths path
       debug:
-        var: "{{ project_path }}"
+        var: "{{ ansible_parent_role_paths }}"
+    
+    - name: Debug playbook_dir path
+      debug:
+        var: "{{ playbook_dir }}"
+    
+    - name: Debug role_dir path
+      debug:
+        var: "{{ role_dir }}"
