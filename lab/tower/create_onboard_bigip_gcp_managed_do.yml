@@ -51,7 +51,7 @@
 
     - name: Debug network info
       debug: 
-        var: gce_network_info['items'][0]['selfLink'] 
+        var: gce_network_info['items'][0]
 
     - name: Create selfLink dict for later
       set_fact: 
@@ -128,7 +128,7 @@
               boot: true
               source: "{{ disk }}"
           network_interfaces:
-              - network: "{{ gce_network_info['items'][0]['selfLink'] }}"
+              - network: "{{ gce_network_info['items'][0] }}"
                 access_configs:
                   - name: 'External NAT'
                     nat_ip: "{{ address }}"
