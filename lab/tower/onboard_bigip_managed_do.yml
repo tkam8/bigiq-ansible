@@ -5,6 +5,9 @@
   gather_facts: false
 
   tasks:
+    # First download galaxy roles for F5 ATC
+    - name: Install roles from Ansible Galaxy
+      command: ansible-galaxy install f5devcentral.atc_deploy -p ../../roles/ 
 
     - set_fact:
         mgmt: "{{ hostvars[inventory_hostname]['mgmt_ip'] }}:{{ hostvars[inventory_hostname]['mgmt_port'] }}"

@@ -9,6 +9,9 @@
     GCE_EMAIL: "{{ lookup('env', 'GCE_EMAIL') }}"
 
   tasks:
+    # First download galaxy roles for F5 ATC
+    - name: Install roles from Ansible Galaxy
+      command: ansible-galaxy install f5devcentral.atc_deploy -p ../../roles/ 
 
     ####################################################
     # Below tasks are for creating a new BIG-IP in GCP #
