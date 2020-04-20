@@ -12,7 +12,7 @@
     # provider var for atc_deploy role
     - set_fact:
         provider: 
-          server: "{{ bigip_gcp_address }}"
+          server: "{{ bigip_mgmt }}"
           server_port: 443
           user: "{{ bigip_user }}"
           password: "{{ bigip_password }}"

@@ -1,13 +1,73 @@
 ---
-- name: Create an instance
-  hosts: localhost
-  gather_facts: no
+- name: TOWER-AS3-BIG-IQ - ONBOARD BIG-IP on BIG-IQ
+  hosts: bigiq
+  connection: local
+  gather_facts: false
   vars:
     GCE_PROJECT: "{{ lookup('env', 'GCE_PROJECT') }}"
     GCE_CREDENTIALS_FILE_PATH: "{{ lookup('env', 'GCE_CREDENTIALS_FILE_PATH') }}"
     GCE_EMAIL: "{{ lookup('env', 'GCE_EMAIL') }}"
 
   tasks:
+
+    ############################################
+    # Below tasks are for offboarding a BIG-IP #
+    ############################################
+    - set_fact:
+        mgmt: "{{ hostvars[inventory_hostname]['mgmt_ip'] }}:{{ hostvars[inventory_hostname]['mgmt_port'] }}"
+
+    # provider var for atc_deploy role
+    - set_fact:
+        provider: 
+          server: "{{ bigip_mgmt }}"
+          server_port: 443
+          user: "{{ bigip_user }}"
+          password: "{{ bigip_password }}"
+          validate_certs: false
+
+    # Get authentication token for uri module tasks below
+    - name: Authenticate to BIG-IQ
+      uri:
+        url: "https://{{ mgmt }}/mgmt/shared/authn/login"
+        method: POST
+        headers:
+          Content-Type: application/json
+        body:
+          username: "{{ bigiq_user }}"
+          password: "{{ bigiq_pass }}"
+          loginProviderName: local
+        body_format: json
+        timeout: 60
+        status_code: 200, 202
+        validate_certs: false
+      register: auth
+
+- name: Remove discovered device and its config
+  bigiq_device_discovery:
+    device_address: 192.168.1.1
+    state: absent
+    provider:
+      password: secret
+      server: lb.mydomain.com
+      user: admin
+  delegate_to: localhost
+
+    # Discover new BIG-IP
+    - name: Discover a new BIG-IP device
+      bigiq_device_discovery:
+        device_address: "{{ bigip_mgmt }}"
+
+        modules: "{{ provisioned_modules }}"
+        provider: 
+          user: "{{ bigiq_user }}"
+          password: "{{ bigiq_pass }}"
+          server: "{{ hostvars[inventory_hostname]['mgmt_ip'] }}"
+          validate_certs: no
+      delegate_to: localhost
+
+    ################################################
+    # Below tasks are for deleting a BIG-IP in GCP #
+    ################################################
 
     # Create a 'custom' Network, as opposed to a legacy network created using gcp_compute_network
     - name: Create Custom Network
@@ -98,3 +158,4 @@
 
     - name: Wait for SSH to come up
       wait_for: host={{ address.address }} port=22 delay=10 timeout=60
+
