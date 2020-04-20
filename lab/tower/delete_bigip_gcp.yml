@@ -1,5 +1,5 @@
 ---
-- name: Delete an instance
+- name: TOWER-AS3-BIG-IQ - DELETE BIG-IP ON GCP
   hosts: localhost
   gather_facts: no
   vars:

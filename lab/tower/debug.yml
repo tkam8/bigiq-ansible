@@ -1,0 +1,12 @@
+---
+
+- name: TOWER-AS3-BIG-IQ - Debug
+  hosts: tower
+  connection: local
+  gather_facts: false
+
+  tasks:
+
+    - name: Debug project path
+      debug:
+        var: "{{ project_path }}"

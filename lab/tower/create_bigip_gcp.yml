@@ -1,5 +1,5 @@
 ---
-- name: Create an instance
+- name: TOWER-AS3-BIG-IQ - CREATE BIG-IP ON GCP
   hosts: localhost
   gather_facts: no
   vars:

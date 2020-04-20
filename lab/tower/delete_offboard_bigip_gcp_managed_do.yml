@@ -1,5 +1,5 @@
 ---
-- name: TOWER-AS3-BIG-IQ - ONBOARD BIG-IP on BIG-IQ
+- name: TOWER-AS3-BIG-IQ - OFFBOARD AND DELETE BIG-IP from BIG-IQ
   hosts: bigiq
   connection: local
   gather_facts: false
