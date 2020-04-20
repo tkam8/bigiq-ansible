@@ -9,3 +9,9 @@
     
     - name: Get setup facts
       setup:
+
+    - name: show pwd
+      command: pwd
+
+    - name: Install roles from Ansible Galaxy
+      command: ansible-galaxy install f5devcentral.atc_deploy -p ./roles/ 
