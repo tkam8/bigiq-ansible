@@ -55,12 +55,22 @@
 
     - name: Create selfLink dict for later
       set_fact: 
-        gce_network_selfLink: 
+        gce_network_selflink: 
           selfLink: "{{ gce_network_info['items'][0]['selfLink'] }}"
+
+    - name: json_query to get selfLink
+      set_fact:
+        gce_network_selflink_jq: "{{ gce_network_info | json_query(query) }}"
+      vars: 
+        query: "items[?name=='{{ gce_network.name }}'].selfLink"
 
     - name: Debug network info
       debug: 
         var: gce_network_selfLink
+
+    - name: Debug network info
+      debug: 
+        var: gce_network_selflink_jq
 
     - name: Open SSH and HTTPS ports in the GCE firewall
       gce_net:
@@ -118,7 +128,7 @@
               boot: true
               source: "{{ disk }}"
           network_interfaces:
-              - network: gce_network_selfLink
+              - network: "{{ gce_network_selflink_jq }}"
                 access_configs:
                   - name: 'External NAT'
                     nat_ip: "{{ address }}"
