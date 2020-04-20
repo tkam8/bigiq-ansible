@@ -117,8 +117,9 @@
         mgmt: "{{ hostvars[inventory_hostname]['mgmt_ip'] }}:{{ hostvars[inventory_hostname]['mgmt_port'] }}"
 
     # provider var for atc_deploy role
-    - set_fact:
-        provider: 
+    - name: Set connection provider for BIG-IP tasks
+      set_fact:
+        provider_atc: 
           server: "{{ bigip_mgmt }}"
           server_port: 443
           user: "{{ bigip_user }}"
@@ -131,7 +132,7 @@
       include_role:
         name: f5devcentral.atc_deploy
       vars: 
-        provider: "{{ provider }}"
+        provider: "{{ provider_atc }}"
         atc_service: Device
         atc_method: POST
         atc_declaration_file: "{{ lookup('template', 'templates/onboard_bigip_do_{{ item.atc_declaration_file }}.j2') }}"
