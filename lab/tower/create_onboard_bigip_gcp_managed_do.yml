@@ -58,6 +58,10 @@
         gce_network_selfLink: 
           selfLink: "{{ gce_network_info['items'][0]['selfLink'] }}"
 
+    - name: Debug network info
+      debug: 
+        var: gce_network_selfLink
+
     - name: Open SSH and HTTPS ports in the GCE firewall
       gce_net:
         name: "{{ resource_prefix }}-network-instance"
@@ -114,7 +118,7 @@
               boot: true
               source: "{{ disk }}"
           network_interfaces:
-              - network: "{{ gce_network_selfLink | to_json }}"
+              - network: "{{ gce_network_selfLink }}"
                 access_configs:
                   - name: 'External NAT'
                     nat_ip: "{{ address }}"
