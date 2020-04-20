@@ -109,7 +109,7 @@
               boot: true
               source: "{{ disk }}"
           network_interfaces:
-              - network: "{{ gce_network_info['items'][0]['selfLink'] }}"
+              - network: gce_network_info['items'][0]['selfLink']
                 access_configs:
                   - name: 'External NAT'
                     nat_ip: "{{ address }}"
