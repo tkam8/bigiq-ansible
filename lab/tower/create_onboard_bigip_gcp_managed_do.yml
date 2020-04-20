@@ -128,7 +128,7 @@
               boot: true
               source: "{{ disk }}"
           network_interfaces:
-              - network: "{{ gce_network_selflink_jq }}"
+              - network: "{{ gce_network_info }}"
                 access_configs:
                   - name: 'External NAT'
                     nat_ip: "{{ address }}"
