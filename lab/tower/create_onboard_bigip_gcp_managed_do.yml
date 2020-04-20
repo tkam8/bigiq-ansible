@@ -134,7 +134,7 @@
       when: "{{ requested_modules == item.when }}"
       loop:
         - { atc_declaration_file: "ltm", when: "ltm" }
-        - { atc_declaration_file: "asm", when: "waf" }
+        - { atc_declaration_file: "asm", when: "asm" }
 
     # Get authentication token for uri module tasks below
     - name: Authenticate to BIG-IQ
