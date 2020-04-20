@@ -11,7 +11,7 @@
   tasks:
     # First download galaxy roles for F5 ATC
     - name: Install roles from Ansible Galaxy
-      command: ansible-galaxy install f5devcentral.atc_deploy -p ../../roles/ 
+      command: ansible-galaxy install f5devcentral.atc_deploy -p ./roles/ 
 
     ####################################################
     # Below tasks are for creating a new BIG-IP in GCP #
@@ -134,7 +134,7 @@
         atc_declaration_file: "{{ lookup('template', 'templates/onboard_bigip_do_{{ item.atc_declaration_file }}.j2') }}"
         atc_delay: 10
         atc_retries: 5
-      when: "{{ requested_modules == item.when }}"
+      when: requested_modules == item.when 
       loop:
         - { atc_declaration_file: "ltm", when: "ltm" }
         - { atc_declaration_file: "asm", when: "asm" }
