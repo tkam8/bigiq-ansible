@@ -20,57 +20,21 @@
     # Below tasks are for creating a new BIG-IP in GCP #
     ####################################################
 
-    # Create a 'custom' Network, as opposed to a legacy network created using gcp_compute_network
-    - name: Create Custom Network
-      gce_net:
-        name: "{{ resource_prefix }}-network-instance"
-        mode: custom
-        credentials_file: "{{ GCE_CREDENTIALS_FILE_PATH }}"
-        service_account_email: "{{ GCE_EMAIL }}"
-        subnet_name: bigiq-lab-subnet
-        subnet_region: "{{ gcp_region }}"
-        ipv4_range: "{{ ip_cidr_range }}"
-        state: present
-      register: gce_network
 
-    # - name: Debug network
-    #   debug: var=gce_network
-
-    - name: get info on the network (selfLink)
-      gcp_compute_network_facts:
-        filters:
-        - name = "{{ gce_network.name }}"
+    - name: Create a network
+      gcp_compute_network:
+        name: "{{ resource_prefix }}-network"
         project: "{{ GCE_PROJECT }}"
         auth_kind: serviceaccount
         service_account_file:  "{{ GCE_CREDENTIALS_FILE_PATH }}"
-      register: gce_network_info
+        auto_create_subnetworks: true
+        routing_config:
+          routing_mode: REGIONAL
+        state: present
+      register: gce_network
 
-    - name: Debug network info
-      debug: 
-        var: gce_network_info
-
-    - name: Debug network info
-      debug: 
-        var: gce_network_info['items'][0]
-
-    - name: Create selfLink dict for later
-      set_fact: 
-        gce_network_selflink: 
-          selfLink: "{{ gce_network_info['items'][0]['selfLink'] }}"
-
-    - name: json_query to get selfLink
-      set_fact:
-        gce_network_selflink_jq: "{{ gce_network_info | json_query(query) }}"
-      vars: 
-        query: "items[?name=='{{ gce_network.name }}'].selfLink"
-
-    - name: Debug network info
-      debug: 
-        var: gce_network_selfLink
-
-    - name: Debug network info
-      debug: 
-        var: gce_network_selflink_jq
+    - name: Debug network
+      debug: var=gce_network
 
     - name: Open SSH and HTTPS ports in the GCE firewall
       gce_net:
@@ -128,7 +92,7 @@
               boot: true
               source: "{{ disk }}"
           network_interfaces:
-              - network: "{{ gce_network_info['items'][0] }}"
+              - network: "{{ gce_network }}"
                 access_configs:
                   - name: 'External NAT'
                     nat_ip: "{{ address }}"
