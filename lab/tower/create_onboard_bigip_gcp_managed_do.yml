@@ -142,6 +142,16 @@
           password: "{{ bigip_password }}"
           validate_certs: false
 
+    - name: prepare the DO declarations
+      template: 
+        src: "templates/onboard_bigip_do_{{ item.src }}.j2"
+        dest: "files/onboard_bigip_do_{{ item.dest }}.json"
+      delegate_to: localhost
+      when: "{{ requested_modules == item.when }}"
+      loop:
+        - { src: "ltm", dest: "ltm", when: "ltm" }
+        - { src: "asm", dest: "asm", when: "asm" }
+
     # Use DO to license, provision, and set passwords on new BIG-IP
     # Official galaxy role for F5 automation tool chain (https://galaxy.ansible.com/f5devcentral/atc_deploy)
     - name: ATC POST
@@ -151,7 +161,7 @@
         provider: "{{ provider_atc }}"
         atc_service: Device
         atc_method: POST
-        atc_declaration_file: "{{ lookup('template', 'templates/onboard_bigip_do_{{ item.atc_declaration_file }}.j2') }}"
+        atc_declaration_file: "{{ lookup('template', 'files/onboard_bigip_do_{{ item.atc_declaration_file }}.json') }}"
         atc_delay: 10
         atc_retries: 10
       when: "{{ requested_modules == item.when }}"
