@@ -14,7 +14,7 @@
       command: pwd
 
     - name: Install roles from Ansible Galaxy
-      command: ansible-galaxy install f5devcentral.atc_deploy -p ../../roles/ 
+      command: ansible-galaxy install f5devcentral.atc_deploy -p ./roles/ 
 
     - name: show downloaded roles
-      command: ls ../../roles
+      command: ls ./roles/

@@ -13,6 +13,9 @@
     - name: Install roles from Ansible Galaxy
       command: ansible-galaxy install f5devcentral.atc_deploy -p ./roles/ 
 
+    - name: show downloaded roles
+      command: ls ./roles/
+
     ####################################################
     # Below tasks are for creating a new BIG-IP in GCP #
     ####################################################
@@ -126,7 +129,7 @@
     # Official galaxy role for F5 automation tool chain (https://galaxy.ansible.com/f5devcentral/atc_deploy)
     - name: ATC POST
       include_role:
-        name: atc_deploy
+        name: f5devcentral.atc_deploy
       vars: 
         provider: "{{ provider }}"
         atc_service: Device
