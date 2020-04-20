@@ -7,10 +7,5 @@
 
   tasks:
     
-    - name: Debug playbook_dir path
-      debug:
-        var: "{{ playbook_dir }}"
-    
-    - name: Debug role_dir path
-      debug:
-        var: "{{ role_dir }}"
+    - name: Get setup facts
+      setup:
