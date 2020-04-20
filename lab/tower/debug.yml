@@ -6,10 +6,6 @@
   gather_facts: false
 
   tasks:
-
-    - name: Debug ansible_parent_role_paths path
-      debug:
-        var: "{{ ansible_parent_role_paths }}"
     
     - name: Debug playbook_dir path
       debug:
