@@ -36,18 +36,23 @@
     - name: Debug network
       debug: var=gce_network
 
-    - name: Open SSH and HTTPS ports in the GCE firewall
-      gce_net:
-        name: "{{ resource_prefix }}-network-instance"
-        fwname: "fw-{{ resource_prefix }}-ssh-https"
-        allowed: "tcp:22,443"
+    - name: create a firewall
+      gcp_compute_firewall:
+        name: "{{ resource_prefix }}-network-fw"
+        allowed:
+          - ip_protocol: tcp
+            ports:
+              - '22'
+              - '443'
+          - ip_protocol: icmp
+        network: "{{ gce_network }}"
+        direction: INGRESS
         target_tags:
-          - bigiq-lab
+        - bigiq-lab
+        project: "{{ GCE_PROJECT }}"
+        auth_kind: serviceaccount
+        service_account_file: "{{ GCE_CREDENTIALS_FILE_PATH }}"
         state: present
-        src_range: 0.0.0.0/0
-        service_account_email: "{{ GCE_EMAIL }}"
-        credentials_file: "{{ GCE_CREDENTIALS_FILE_PATH }}"
-        project_id: "{{ GCE_PROJECT }}"
 
     - name: create an address
       gcp_compute_address:
