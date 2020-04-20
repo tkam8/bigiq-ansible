@@ -154,7 +154,7 @@
         atc_declaration_file: "{{ lookup('template', 'templates/onboard_bigip_do_{{ item.atc_declaration_file }}.j2') }}"
         atc_delay: 10
         atc_retries: 10
-      when: requested_modules == item.when 
+      when: "{{ requested_modules == item.when }}"
       loop:
         - { atc_declaration_file: "ltm", when: "ltm" }
         - { atc_declaration_file: "asm", when: "asm" }
