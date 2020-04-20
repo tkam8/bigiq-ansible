@@ -6,7 +6,6 @@
     GCE_PROJECT: "{{ lookup('env', 'GCE_PROJECT') }}"
     GCE_CREDENTIALS_FILE_PATH: "{{ lookup('env', 'GCE_CREDENTIALS_FILE_PATH') }}"
     GCE_EMAIL: "{{ lookup('env', 'GCE_EMAIL') }}"
-    resource_prefix: "bigiq-lab"
 
   tasks:
 
