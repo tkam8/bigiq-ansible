@@ -53,6 +53,18 @@
         dest: "files/revoke_bigip_do.json"
       delegate_to: localhost
 
+    # Official galaxy role for F5 automation tool chain (https://galaxy.ansible.com/f5devcentral/atc_deploy)
+    - name: ATC POST
+      include_role:
+        name: f5devcentral.atc_deploy
+      vars: 
+        provider: "{{ provider_atc }}"
+        atc_service: Device
+        atc_method: POST
+        atc_declaration_file: "files/revoke_bigip_do.json"
+        atc_delay: 15
+        atc_retries: 40
+
     # Get authentication token for uri module tasks below
     - name: Authenticate to BIG-IQ
       uri:
