@@ -132,14 +132,14 @@
     - set_fact:
         mgmt: "{{ hostvars[inventory_hostname]['mgmt_ip'] }}:{{ hostvars[inventory_hostname]['mgmt_port'] }}"
 
-    # provider var for atc_deploy role
-    - name: Set connection provider for BIG-IP tasks
+    # provider var for atc_deploy role, using BIG-IQ
+    - name: Set connection provider for BIG-IQ tasks
       set_fact:
         provider_atc: 
-          server: "{{ bigip_mgmt }}"
+          server: "{{ hostvars[inventory_hostname]['mgmt_ip'] }}"
           server_port: 8443
-          user: "{{ bigip_user }}"
-          password: "{{ bigip_password }}"
+          user: "{{ bigiq_user }}"
+          password: "{{ bigiq_pass }}"
           validate_certs: false
 
     - name: prepare the DO declarations
