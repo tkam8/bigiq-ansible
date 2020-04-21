@@ -137,7 +137,7 @@
       set_fact:
         provider_atc: 
           server: "{{ hostvars[inventory_hostname]['mgmt_ip'] }}"
-          server_port: 8443
+          server_port: 443
           user: "{{ bigiq_user }}"
           password: "{{ bigiq_pass }}"
           validate_certs: false
