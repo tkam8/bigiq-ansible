@@ -162,8 +162,8 @@
         atc_service: Device
         atc_method: POST
         atc_declaration_file: "files/onboard_bigip_do_{{ item.atc_declaration_file }}.json"
-        atc_delay: 10
-        atc_retries: 10
+        atc_delay: 15
+        atc_retries: 40
       when: "{{ requested_modules == item.when }}"
       loop:
         - { atc_declaration_file: "ltm", when: "ltm" }
