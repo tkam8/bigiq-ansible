@@ -152,7 +152,7 @@
         - { src: "ltm", dest: "ltm", when: "ltm" }
         - { src: "asm", dest: "asm", when: "asm" }
 
-    # Use DO to license, provision, and set passwords on new BIG-IP
+    # Use DO to license, provision, and discover new BIG-IP on BIG-IQ
     # Official galaxy role for F5 automation tool chain (https://galaxy.ansible.com/f5devcentral/atc_deploy)
     - name: ATC POST
       include_role:
@@ -168,48 +168,3 @@
       loop:
         - { atc_declaration_file: "ltm", when: "ltm" }
         - { atc_declaration_file: "asm", when: "asm" }
-
-    # Get authentication token for uri module tasks below
-    - name: Authenticate to BIG-IQ
-      uri:
-        url: "https://{{ mgmt }}/mgmt/shared/authn/login"
-        method: POST
-        headers:
-          Content-Type: application/json
-        body:
-          username: "{{ bigiq_user }}"
-          password: "{{ bigiq_pass }}"
-          loginProviderName: local
-        body_format: json
-        timeout: 60
-        status_code: 200, 202
-        validate_certs: false
-      register: auth
-
-    # By default, LTM is provisioned, so adding to the list of modules to discover when registering on BIG-IQ.
-    # Also adding in GTM  
-    - set_fact:
-        provisioned_modules: ['ltm', 'gtm']
-
-    # Note that security_shared is also required here
-    - name: Add ASM to list of modules to discover
-      set_fact:
-        provisioned_modules: "{{ provisioned_modules + ['asm'] + ['security_shared']}}"
-      when: requested_modules == "asm"
-
-    - name: Debug provisioned_modules list
-      debug: var=provisioned_modules
-
-    # Discover new BIG-IP
-    - name: Discover a new BIG-IP device
-      bigiq_device_discovery:
-        device_address: "{{ bigip_mgmt }}"
-        device_username: "{{ bigip_user }}"
-        device_password: "{{ bigip_password }}"
-        modules: "{{ provisioned_modules }}"
-        provider: 
-          user: "{{ bigiq_user }}"
-          password: "{{ bigiq_pass }}"
-          server: "{{ hostvars[inventory_hostname]['mgmt_ip'] }}"
-          validate_certs: no
-      delegate_to: localhost
