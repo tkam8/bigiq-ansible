@@ -168,3 +168,6 @@
       loop:
         - { atc_declaration_file: "ltm", when: "ltm" }
         - { atc_declaration_file: "asm", when: "asm" }
+
+    #Add new BIG-IP to user specified resource group (role) so it is accessible by the relevant users
+    

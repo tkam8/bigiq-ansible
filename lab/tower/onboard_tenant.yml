@@ -68,6 +68,27 @@
       delegate_to: localhost
       when: new_user_exists is undefined
 
+    # Get All Roles
+    - name: Get all BIG-IQ roles
+      uri:
+        headers:
+          X-F5-Auth-Token: "{{ auth.json.token.token }}"
+        method: GET
+        status_code: 200,202
+        url: "https://{{ mgmt }}/mgmt/shared/authorization/roles"
+        validate_certs: false
+        timeout: 60
+      register: role_list
+      delegate_to: localhost
+
+
+    # Get Role selfLink based on name provided by user
+    - name: Get BIG-IQ role selfLink
+      set_fact:
+        custom_role: "{{ role_list | json_query(query) }}"
+      vars: 
+        query: "json.items[?displayName=='{{ role_name }}'].selfLink"
+
     - name: Add new user to existing role
       uri:
         body: "{{ lookup('template', 'templates/role_associate.j2') }}"
@@ -76,7 +97,7 @@
           X-F5-Auth-Token: "{{ auth.json.token.token }}"
         method: PATCH
         status_code: 200,202
-        url: "https://{{ mgmt }}/mgmt/shared/authorization/roles/a11e7dd6-235d-38e8-b8a4-39995626e3ac"
+        url: "{{ custom_role }}"
         validate_certs: false
         timeout: 60
       register: user_status
