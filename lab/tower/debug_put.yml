@@ -6,6 +6,7 @@
   vars:
     bigip_mgmt: "10.1.1.9"
 
+  tasks:
     - set_fact:
         mgmt: "{{ hostvars[inventory_hostname]['mgmt_ip'] }}:{{ hostvars[inventory_hostname]['mgmt_port'] }}"
 
