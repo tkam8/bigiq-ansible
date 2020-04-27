@@ -110,13 +110,13 @@
     - name: Debug new_device_permit_ref
       debug: var=new_device_permit_ref
 
-    # Get generation count for application creator role
-    - name: Get generation count for application creator role
-      set_fact:
-        generation_count: "{{ app_creator_role_json.json.generation }}"
+    # # Get generation count for application creator role
+    # - name: Get generation count for application creator role
+    #   set_fact:
+    #     generation_count: "{{ app_creator_role_json.json.generation }}"
 
-    - name: Debug generation_count
-      debug: var=generation_count
+    # - name: Debug generation_count
+    #   debug: var=generation_count
 
     # Replace existing devicePermitReferences list with new one including new BIG-IP
     - name: Replace existing devicePermitReferences with new one
@@ -124,8 +124,9 @@
         new_app_creator_role_json: "{{ app_creator_role_json | combine({'json': item.new_app_creator_role_json }, recursive=True) }}"
       loop:
         - { new_app_creator_role_json: {'devicePermitReferences': new_device_permit_ref } }
-        - { new_app_creator_role_json: {'generation': "{{ generation_count | int + 1 }}" } }
-
+        - { new_app_creator_role_json: {'generation': "" } }
+        - { new_app_creator_role_json: {'lastUpdateMicros': "" } }
+        
     - name: Debug new_app_creator_role_json
       debug: var=new_app_creator_role_json
 
