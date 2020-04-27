@@ -30,7 +30,7 @@
         device_permit_new: "{{ device_permit_result.selfLink | list }}"
 
     - name: Debug address
-       debug: var=device_permit_new
+        debug: var=device_permit_new
 
     # Query for all application-creator-roles
     - name: Get all application-creator-roles
@@ -53,10 +53,10 @@
         query: "json.items[?displayName=='{{ role_name }}'].selfLink"
 
     - name: Debug address
-       debug: var=custom_role
+        debug: var=custom_role
 
     - name: Debug address
-       debug: msg="{{ custom_role | regex_replace('localhost', mgmt) }}"
+        debug: msg="{{ custom_role | regex_replace('localhost', mgmt) }}"
 
     # Get json of the application creator role and write the result to file
     - name: Get Application Creator Role
@@ -72,10 +72,10 @@
       delegate_to: localhost
 
     - name: Debug address
-       debug: var=app_creator_role_json
+        debug: var=app_creator_role_json
 
     - name: Debug address
-       debug: msg="{{ app_creator_role_json | from_json }}"
+        debug: msg="{{ app_creator_role_json | from_json }}"
 
     # - name: display app_creator_role.json file contents
     #   debug: var=item
@@ -102,6 +102,6 @@
         new_app_creator_role_json: "{{ app_creator_role_json | combine( 'devicePermitReferences': device_permit_ref_new ) }}"
 
     - name: Debug address
-       debug: var=new_app_creator_role_json
+        debug: var=new_app_creator_role_json
 
     #Update configuration of application creator role using the new config

@@ -215,10 +215,10 @@
 
 
     - name: Debug address
-       debug: var=custom_role
+        debug: var=custom_role
 
     - name: Debug address
-       debug: msg="{{ custom_role | regex_replace('localhost', mgmt) }}"
+        debug: msg="{{ custom_role | regex_replace('localhost', mgmt) }}"
 
     # Get json of the application creator role and write the result to file
     - name: Get Application Creator Role
@@ -254,5 +254,8 @@
         device_permit_ref_new: "{{ device_permit_ref_existing +  device_permit_new }}"
 
     #Replace existing devicePermitReferences list with new one including new BIG-IP
+    - name: Replace existing devicePermitReferences with new one
+      set_fact:
+        animals: "{{ animals|combine({'birds': {'cardinals': {'feathers': 'red'}}}, recursive=True) }}"
 
     #Update configuration of application creator role using the new config
