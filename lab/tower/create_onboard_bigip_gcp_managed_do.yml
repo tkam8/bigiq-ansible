@@ -173,7 +173,6 @@
     ######################################################################################
     # Below tasks are for adding the BIG-IP to an existing role resource group on BIG-IQ #
     ######################################################################################
-
     - name: Authenticate to BIG-IQ
       uri:
         url: "https://{{ mgmt }}/mgmt/shared/authn/login"
@@ -207,7 +206,11 @@
 
     # Get just the selfLink and convert to list 
     - set_fact:
-        device_permit_new: "{{ device_permit_result.selfLink | list }}"
+        new_device_permit: 
+          - link: "{{ device_permit_result.json.selfLink }}"
+
+    - name: Debug address
+      debug: var=new_device_permit
 
     # Query for all application-creator-roles
     - name: Get all application-creator-roles
@@ -225,10 +228,9 @@
     # Get Role selfLink based on name provided by user
     - name: Get BIG-IQ Application Creator Role selfLink
       set_fact:
-        custom_role: "{{ app_creator_role_list | json_query(query) }}"
+        custom_role: "{{ app_creator_role_list | json_query(query) | join(' ') }}"
       vars: 
         query: "json.items[?displayName=='{{ role_name }}'].selfLink"
-
 
     - name: Debug address
       debug: var=custom_role
@@ -245,10 +247,12 @@
         status_code: 200,202
         url: "{{ custom_role | regex_replace('localhost', mgmt) }}"
         validate_certs: false
-        body_format: json
         timeout: 60
       register: app_creator_role_json
       delegate_to: localhost
+
+    - name: Debug app_creator_role_json
+      debug: var=app_creator_role_json
 
     # - name: display app_creator_role.json file contents
     #   debug: var=item
@@ -262,16 +266,25 @@
     # Get existing devicePermitReferences list of the application creator role
     - name: Get existing devicePermitReferences list
       set_fact:
-        device_permit_ref_existing: app_creator_role_json.devicePermitReferences
+        existing_device_permit_ref: "{{ app_creator_role_json.json.devicePermitReferences }}"
+
+    - name: Debug existing_device_permit_ref
+      debug: var=existing_device_permit_ref
 
     # Append new BIG-IP devicePermit selfLink to devicePermitReferences list of the application creator role
     - name: Append new BIG-IP devicePermit selfLink to devicePermitReferences list 
       set_fact:
-        device_permit_ref_new: "{{ device_permit_ref_existing +  device_permit_new }}"
+        new_device_permit_ref: "{{ existing_device_permit_ref + new_device_permit }}"
+
+    - name: Debug new_device_permit_ref
+      debug: var=new_device_permit_ref
 
     #Replace existing devicePermitReferences list with new one including new BIG-IP
     - name: Replace existing devicePermitReferences with new one
       set_fact:
-        animals: "{{ animals|combine({'birds': {'cardinals': {'feathers': 'red'}}}, recursive=True) }}"
+        new_app_creator_role_json: "{{ app_creator_role_json | combine({'json': {'devicePermitReferences': new_device_permit_ref }}, recursive=True) }}"
+
+    - name: Debug new_app_creator_role_json
+      debug: var=new_app_creator_role_json
 
     #Update configuration of application creator role using the new config
