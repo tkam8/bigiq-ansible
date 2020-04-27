@@ -215,10 +215,10 @@
 
 
     - name: Debug address
-        debug: var=custom_role
+      debug: var=custom_role
 
     - name: Debug address
-        debug: msg="{{ custom_role | regex_replace('localhost', mgmt) }}"
+      debug: msg="{{ custom_role | regex_replace('localhost', mgmt) }}"
 
     # Get json of the application creator role and write the result to file
     - name: Get Application Creator Role
