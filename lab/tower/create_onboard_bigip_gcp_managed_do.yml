@@ -126,9 +126,9 @@
     - name: Wait for SSH to come up
       wait_for: host={{ bigip_mgmt }} port=22 delay=10 timeout=60
 
-    ###########################################################
-    # Below tasks are for onboarding the newly created BIG-IP #
-    ###########################################################
+    ####################################################################
+    # Below tasks are for onboarding the newly created BIG-IP on BIG-IQ#
+    ####################################################################
     - set_fact:
         mgmt: "{{ hostvars[inventory_hostname]['mgmt_ip'] }}:{{ hostvars[inventory_hostname]['mgmt_port'] }}"
 
@@ -169,5 +169,90 @@
         - { atc_declaration_file: "ltm", when: "ltm" }
         - { atc_declaration_file: "asm", when: "asm" }
 
-    #Add new BIG-IP to user specified resource group (role) so it is accessible by the relevant users
-    
+
+    ######################################################################################
+    # Below tasks are for adding the BIG-IP to an existing role resource group on BIG-IQ #
+    ######################################################################################
+
+    # Get BIG-IP's devicePermit selfLink used to append to an existing role's resource group
+    - name: Get BIG-IP devicePermit selfLink
+      uri:
+        body: "{{ lookup('template', 'templates/device_permit.j2') }}"
+        body_format: json
+        headers:
+          X-F5-Auth-Token: "{{ auth.json.token.token }}"
+        method: POST
+        status_code: 200,202
+        url: "https://{{ mgmt }}/mgmt/cm/shared/device-permits"
+        validate_certs: false
+        timeout: 60
+      register: device_permit_result
+      delegate_to: localhost
+
+    # Get just the selfLink and convert to list 
+    - set_fact:
+        device_permit_new: "{{ device_permit_result.selfLink | list }}"
+
+    # Query for all application-creator-roles
+    - name: Get all application-creator-roles
+      uri:
+        headers:
+          X-F5-Auth-Token: "{{ auth.json.token.token }}"
+        method: GET
+        status_code: 200,202
+        url: "https://{{ mgmt }}/mgmt/shared/authorization/application-creator-roles"
+        validate_certs: false
+        timeout: 60
+      register: app_creator_role_list
+      delegate_to: localhost
+
+    # Get Role selfLink based on name provided by user
+    - name: Get BIG-IQ Application Creator Role selfLink
+      set_fact:
+        custom_role: "{{ app_creator_role_list | json_query(query) }}"
+      vars: 
+        query: "json.items[?displayName=='{{ role_name }}'].selfLink"
+
+
+    - name: Debug address
+       debug: var=custom_role
+
+    - name: Debug address
+       debug: msg="{{ custom_role | regex_replace('localhost', mgmt) }}"
+
+    # Get json of the application creator role and write the result to file
+    - name: Get Application Creator Role
+      uri:
+        headers:
+          X-F5-Auth-Token: "{{ auth.json.token.token }}"
+        method: GET
+        status_code: 200,202
+        url: "{{ custom_role | regex_replace('localhost', mgmt) }}"
+        validate_certs: false
+        body_format: json
+        timeout: 60
+      register: app_creator_role_json
+      delegate_to: localhost
+
+    # - name: display app_creator_role.json file contents
+    #   debug: var=item
+    #   with_file:
+    #     - "templates/app_creator_role.json"
+
+    # - name: Install jq (json parser) package
+    #   apt: name=jq state=present
+
+    #Use below 4 tasks to modify just the devicePermitReferences list
+    # Get existing devicePermitReferences list of the application creator role
+    - name: Get existing devicePermitReferences list
+      set_fact:
+        device_permit_ref_existing: app_creator_role_json.devicePermitReferences
+
+    # Append new BIG-IP devicePermit selfLink to devicePermitReferences list of the application creator role
+    - name: Append new BIG-IP devicePermit selfLink to devicePermitReferences list 
+      set_fact:
+        device_permit_ref_new: "{{ device_permit_ref_existing +  device_permit_new }}"
+
+    #Replace existing devicePermitReferences list with new one including new BIG-IP
+
+    #Update configuration of application creator role using the new config

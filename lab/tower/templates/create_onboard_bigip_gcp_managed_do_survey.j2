@@ -82,6 +82,18 @@
             "variable": "requested_modules",
             "question_name": "Type "asm" to provision F5 WAF, leave "null" if not needed",
             "type": "text"
+        },
+        {
+            "required": true,
+            "min": 0,
+            "default": "testrole1",
+            "max": 1024,
+            "question_description": "BIG-IP will be added to this role's resource group",
+            "choices": "",
+            "new_question": true,
+            "variable": "role_name",
+            "question_name": "Existing Role Name",
+            "type": "text"
         }
     ]
 }
