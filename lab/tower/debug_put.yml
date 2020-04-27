@@ -124,7 +124,7 @@
         new_app_creator_role_json: "{{ app_creator_role_json | combine({'json': item.new_app_creator_role_json }, recursive=True) }}"
       loop:
         - { new_app_creator_role_json: {'devicePermitReferences': new_device_permit_ref } }
-        - { new_app_creator_role_json: {'generation': {{ generation_count + 1 }} } }
+        - { new_app_creator_role_json: {'generation': "{{ generation_count + 1 }}" } }
 
     - name: Debug new_app_creator_role_json
       debug: var=new_app_creator_role_json
