@@ -5,6 +5,7 @@
   gather_facts: false
   vars:
     bigip_mgmt: "10.1.1.9"
+    role_name: "testrole1"
 
   tasks:
     - set_fact:
