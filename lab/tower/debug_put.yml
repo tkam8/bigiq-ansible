@@ -120,7 +120,7 @@
     #Replace existing devicePermitReferences list with new one including new BIG-IP
     - name: Replace existing devicePermitReferences with new one
       set_fact:
-        new_app_creator_role_json: "{{ app_creator_role_json | combine({'json': {'devicePermitReferences': device_permit_ref_new }}) }}"
+        new_app_creator_role_json: "{{ app_creator_role_json | combine({'json': {'devicePermitReferences': new_device_permit_ref }}, recursive=True) }}"
 
     - name: Debug new_app_creator_role_json
       debug: var=new_app_creator_role_json
