@@ -43,7 +43,7 @@
 
     # Get just the selfLink and convert to list 
     - set_fact:
-        device_permit_new: "{{ device_permit_result.json.selfLink | list }}"
+        device_permit_new: "{{ device_permit_result.json.selfLink }}"
 
     - name: Debug address
       debug: var=device_permit_new
@@ -105,7 +105,7 @@
     # Get existing devicePermitReferences list of the application creator role
     - name: Get existing devicePermitReferences list
       set_fact:
-        device_permit_ref_existing: "{{ app_creator_role_json.devicePermitReferences | list }}"
+        device_permit_ref_existing: "{{ app_creator_role_json.devicePermitReferences }}"
 
     # Append new BIG-IP devicePermit selfLink to devicePermitReferences list of the application creator role
     - name: Append new BIG-IP devicePermit selfLink to devicePermitReferences list 
