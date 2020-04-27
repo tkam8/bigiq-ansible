@@ -113,7 +113,7 @@
     # Get generation count for application creator role
     - name: Get generation count for application creator role
       set_fact:
-        generation_count: "{{ app_creator_role_json.json.generation }}"
+        generation_count: "{{ app_creator_role_json.json.generation | int }}"
 
     - name: Debug generation_count
       debug: var=generation_count
