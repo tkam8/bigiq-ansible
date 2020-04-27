@@ -43,7 +43,7 @@
 
     # Get just the selfLink and convert to list 
     - set_fact:
-        device_permit_new: "{{ device_permit_result.selfLink | list }}"
+        device_permit_new: "{{ device_permit_result.json.selfLink | list }}"
 
     - name: Debug address
       debug: var=device_permit_new
