@@ -103,7 +103,7 @@
     # Get existing devicePermitReferences list of the application creator role
     - name: Get existing devicePermitReferences list
       set_fact:
-        device_permit_ref_existing: "{{ app_creator_role_json.devicePermitReferences }}"
+        device_permit_ref_existing: "{{ app_creator_role_json.json.devicePermitReferences }}"
 
     # Append new BIG-IP devicePermit selfLink to devicePermitReferences list of the application creator role
     - name: Append new BIG-IP devicePermit selfLink to devicePermitReferences list 
