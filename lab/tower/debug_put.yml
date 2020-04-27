@@ -93,15 +93,7 @@
     - name: Debug app_creator_role_json
       debug: var=app_creator_role_json
 
-    # - name: display app_creator_role.json file contents
-    #   debug: var=item
-    #   with_file:
-    #     - "templates/app_creator_role.json"
-
-    # - name: Install jq (json parser) package
-    #   apt: name=jq state=present
-
-    #Use below 4 tasks to modify just the devicePermitReferences list
+    # Use below 4 tasks to modify just the devicePermitReferences list
     # Get existing devicePermitReferences list of the application creator role
     - name: Get existing devicePermitReferences list
       set_fact:
@@ -118,13 +110,25 @@
     - name: Debug new_device_permit_ref
       debug: var=new_device_permit_ref
 
-    #Replace existing devicePermitReferences list with new one including new BIG-IP
+    # Get generation count for application creator role
+    - name: Get generation count for application creator role
+      set_fact:
+        generation_count: "{{ app_creator_role_json.json.generation }}"
+
+    - name: Debug generation_count
+      debug: var=generation_count
+
+    # Replace existing devicePermitReferences list with new one including new BIG-IP
     - name: Replace existing devicePermitReferences with new one
       set_fact:
-        new_app_creator_role_json: "{{ app_creator_role_json | combine({'json': {'devicePermitReferences': new_device_permit_ref }}, recursive=True) }}"
+        new_app_creator_role_json: "{{ app_creator_role_json | combine({'json': item.new_app_creator_role_json }, recursive=True) }}"
+      loop:
+        - { new_app_creator_role_json: {'devicePermitReferences': new_device_permit_ref } }
+        - { new_app_creator_role_json: {'generation': {{ generation_count + 1 }} } }
 
     - name: Debug new_app_creator_role_json
       debug: var=new_app_creator_role_json
+
 
     #Update configuration of application creator role using the new config
     - name: Update existing role with new configuration that includes new BIG-IP
