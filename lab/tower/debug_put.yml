@@ -73,8 +73,9 @@
     - name: Debug address
       debug: var=custom_role
 
-    - name: Debug address
-      debug: msg="{{ custom_role | regex_replace('localhost', mgmt) }}"
+    - name: Add IP address to BIG-IQ Application Creator Role selfLink
+      set_fact:
+        custom_role_selflink: "{{ custom_role | regex_replace('localhost', mgmt) }}"
 
     # Get json of the application creator role and write the result to file
     - name: Get Application Creator Role
@@ -134,7 +135,7 @@
           X-F5-Auth-Token: "{{ auth.json.token.token }}"
         method: PUT
         status_code: 200,202
-        url: "https://{{ mgmt }}/mgmt/cm/shared/device-permits"
+        url: "{{ custom_role_selflink }}"
         validate_certs: false
         timeout: 60
       register: new_app_creator_role_json_result
