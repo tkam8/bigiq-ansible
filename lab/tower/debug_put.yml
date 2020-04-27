@@ -122,7 +122,7 @@
     # Also remove the keys "generation" and "lastUpdateMicros" to prepare the body for PUT
     - name: Replace existing devicePermitReferences with new one
       set_fact:
-        new_app_creator_role_json: "{{ app_creator_role_json | combine({'json': {'devicePermitReferences': new_device_permit_ref }}, recursive=True) | rejectattr('key', 'search', 'generation:') | rejectattr('key', 'search', 'lastUpdateMicros:') }}"
+        new_app_creator_role_json: "{{ app_creator_role_json | rejectattr('key', 'search', 'generation') | rejectattr('key', 'search', 'lastUpdateMicros') | combine({'json': {'devicePermitReferences': new_device_permit_ref }}, recursive=True) }}"
         
     - name: Debug new_app_creator_role_json
       debug: var=new_app_creator_role_json
