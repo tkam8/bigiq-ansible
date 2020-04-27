@@ -10,6 +10,22 @@
     - set_fact:
         mgmt: "{{ hostvars[inventory_hostname]['mgmt_ip'] }}:{{ hostvars[inventory_hostname]['mgmt_port'] }}"
 
+    - name: Authenticate to BIG-IQ
+      uri:
+        url: "https://{{ mgmt }}/mgmt/shared/authn/login"
+        method: POST
+        headers:
+          Content-Type: application/json
+        body:
+          username: "{{ bigiq_user }}"
+          password: "{{ bigiq_pass }}"
+          loginProviderName: local
+        body_format: json
+        timeout: 60
+        status_code: 200, 202
+        validate_certs: false
+      register: auth
+
     # Get BIG-IP's devicePermit selfLink used to append to an existing role's resource group
     - name: Get BIG-IP devicePermit selfLink
       uri:
