@@ -65,7 +65,7 @@
     # Get Role selfLink based on name provided by user
     - name: Get BIG-IQ Application Creator Role selfLink
       set_fact:
-        custom_role: "{{ app_creator_role_list | json_query(query) }}"
+        custom_role: "{{ app_creator_role_list | json_query(query) | join(' ') }}"
       vars: 
         query: "json.items[?displayName=='{{ role_name }}'].selfLink"
 
