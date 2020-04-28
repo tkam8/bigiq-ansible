@@ -66,7 +66,7 @@
         timeout: 60
       register: user_status
       delegate_to: localhost
-      when: "new_user_exists = ''"
+      when: "{{ new_user_exists }} = ''"
 
     # Get All Roles
     - name: Get all BIG-IQ roles
