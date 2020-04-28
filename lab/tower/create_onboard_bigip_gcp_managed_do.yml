@@ -17,7 +17,7 @@
     atc_service: Device
     atc_method: POST
     atc_delay: 15
-    atc_retries: 40
+    atc_retries: 45
 
   tasks:
     # First download galaxy roles for F5 ATC
