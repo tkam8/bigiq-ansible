@@ -97,7 +97,7 @@
           X-F5-Auth-Token: "{{ auth.json.token.token }}"
         method: PATCH
         status_code: 200,202
-        url: "{{ custom_role }}"
+        url: "{{ custom_role | regex_replace('localhost', mgmt) }}"
         validate_certs: false
         timeout: 60
       register: user_status
