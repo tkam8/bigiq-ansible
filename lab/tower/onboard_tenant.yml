@@ -46,7 +46,7 @@
 
     - name: Get BIG-IQ user
       set_fact:
-        new_user_exists: "{{ user_list | json_query(query) }}"
+        new_user_exists: "{{ user_list | json_query(query) | join(' ') }}"
       vars: 
         query: "json.items[?name=='{{ user_name }}'].name"
 
