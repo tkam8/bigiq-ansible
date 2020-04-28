@@ -18,6 +18,7 @@
     atc_method: POST
     atc_delay: 15
     atc_retries: 45
+    atc_timeout: 120
 
   tasks:
     # First download galaxy roles for F5 ATC
