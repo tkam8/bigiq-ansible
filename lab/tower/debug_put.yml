@@ -120,10 +120,9 @@
 
     # Replace existing devicePermitReferences list with new one including new BIG-IP
     # Also remove the keys "generation" and "lastUpdateMicros" to prepare the body for PUT
-    # | combine({'json': {'devicePermitReferences': new_device_permit_ref }}, recursive=True)
     - name: Replace existing devicePermitReferences with new one
       set_fact:
-        new_app_creator_role_json: "{{ app_creator_role_json.json | dict2items | rejectattr('key', 'search', 'generation') | rejectattr('key', 'search', 'lastUpdateMicros') | list | items2dict }}"
+        new_app_creator_role_json: "{{ app_creator_role_json.json | dict2items | rejectattr('key', 'search', 'generation') | rejectattr('key', 'search', 'lastUpdateMicros') | list | items2dict | combine({'devicePermitReferences': new_device_permit_ref }, recursive=True) }}"
         
     - name: Debug new_app_creator_role_json
       debug: var=new_app_creator_role_json
@@ -132,7 +131,7 @@
     #Update configuration of application creator role using the new config
     - name: Update existing role with new configuration that includes new BIG-IP
       uri:
-        body: "{{ new_app_creator_role_json.json }}"
+        body: "{{ new_app_creator_role_json }}"
         body_format: json
         headers:
           X-F5-Auth-Token: "{{ auth.json.token.token }}"
