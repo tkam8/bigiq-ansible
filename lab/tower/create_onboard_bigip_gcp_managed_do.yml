@@ -161,12 +161,8 @@
     # Using the tasks from the galaxy role to test
     - name: Setup provider and varables
       set_fact:
-        provider: "{{ provider }}"
-        atc_declaration_url: "{{ atc_declaration_url|default(omit) }}"
+        provider: "{{ provider_atc }}"
         atc_declaration_file: "files/onboard_bigip_do_{{ item.atc_declaration_file }}.json"
-        atc_tenant: "{{ as3_tenant|default(omit) }}"
-        atc_show: "{{ as3_show|default(omit) }}"
-        atc_show_hash: "{{ as3_showhash|default(false) }}"
 
     - name: Set Automated Tool Chain service type from file
       set_fact:
