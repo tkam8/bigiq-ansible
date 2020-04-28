@@ -123,7 +123,7 @@
     # | combine({'json': {'devicePermitReferences': new_device_permit_ref }}, recursive=True)
     - name: Replace existing devicePermitReferences with new one
       set_fact:
-        new_app_creator_role_json: "{{ app_creator_role_json.json | dict2items | rejectattr('key', 'search', 'generation:') | rejectattr('key', 'search', 'lastUpdateMicros:') | list | items2dict }}"
+        new_app_creator_role_json: "{{ app_creator_role_json.json | dict2items | rejectattr('key', 'search', 'generation') | rejectattr('key', 'search', 'lastUpdateMicros') | list | items2dict }}"
         
     - name: Debug new_app_creator_role_json
       debug: var=new_app_creator_role_json
