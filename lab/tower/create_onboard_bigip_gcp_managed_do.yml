@@ -201,12 +201,12 @@
       delay: "{{ atc_delay }}"
 
     - name: include declare.yaml
-      include_tasks: declare.yaml
+      include_tasks: tasks/declare.yaml
 
     - name: Handle BIG-IQ token timeouts during BIG-IP onboarding
       block:
         - name: include atc_task_check.yaml
-          include_tasks: atc_task_check.yaml
+          include_tasks: tasks/atc_task_check.yaml
           when:
             - atc_service == "AS3" or atc_service == "Device"
       rescue:
