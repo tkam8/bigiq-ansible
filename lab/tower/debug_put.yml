@@ -5,7 +5,7 @@
   gather_facts: false
   vars:
     bigip_mgmt: "10.1.1.13"
-    role_name: "testrole1"
+    role_name: "testrole2"
 
   tasks:
     - set_fact:
@@ -27,27 +27,38 @@
         validate_certs: false
       register: auth
 
-    # Get BIG-IP's devicePermit selfLink used to append to an existing role's resource group
-    - name: Get BIG-IP devicePermit selfLink
+    # Get BIG-IP's machineid which is used to build the devicePermit selfLink 
+    # that's then used to append to the list of devices in an existing role's resource group
+    - name: Get BIG-IP machineId
       uri:
-        body: "{{ lookup('template', 'templates/device_permit.j2') }}"
-        body_format: json
         headers:
           X-F5-Auth-Token: "{{ auth.json.token.token }}"
-        method: POST
+        method: GET
         status_code: 200,202
-        url: "https://{{ mgmt }}/mgmt/cm/shared/device-permits"
+        url: "https://{{ mgmt }}/mgmt/shared/resolver/device-groups/cm-bigip-allBigIpDevices/devices"
         validate_certs: false
         timeout: 60
-      register: device_permit_result
+      register: device_ref_query
       delegate_to: localhost
 
-    # Get just the selfLink and convert to list 
-    - set_fact:
-        new_device_permit: 
-          - link: "{{ device_permit_result.json.selfLink }}"
+    # Get the machineID of the user specified BIG-IP
+    - name: Get the machineID of the user specified BIG-IP
+      set_fact:
+        machine_id: "{{ device_ref_query | json_query(query) | join(' ') }}"
+      vars: 
+        query: "json.items[?address=='{{ bigip_mgmt }}'].machineId"
 
-    - name: Debug address
+    - name: Debug machineId
+      debug: var=machine_id
+
+    # Use the machineId to create the new BIG-IP devicePermit selfLink with key set as "link". 
+    # This is the format used in the role's devicePermitReferences list
+    - name: Create new devicePermit selfLink 
+      set_fact:
+        new_device_permit: 
+          - link: "https://{{ mgmt }}/mgmt/cm/shared/device-permits/{{ machine_id }}"
+
+    - name: Debug machineId
       debug: var=new_device_permit
 
     # Query for all application-creator-roles
@@ -63,12 +74,12 @@
       register: app_creator_role_list
       delegate_to: localhost
 
-    # Get Role selfLink based on name provided by user
+    # Get Role selfLink based on name provided by user, which is the value in a key called displayName
     - name: Get BIG-IQ Application Creator Role selfLink
       set_fact:
         custom_role: "{{ app_creator_role_list | json_query(query) | join(' ') }}"
       vars: 
-        query: "json.items[?displayName=='{{ role_name }}'].selfLink"
+        query: "json.items[?displayName == '{{ role_name }}'].selfLink"
 
     - name: Debug address
       debug: var=custom_role
@@ -84,20 +95,20 @@
           X-F5-Auth-Token: "{{ auth.json.token.token }}"
         method: GET
         status_code: 200,202
-        url: "{{ custom_role | regex_replace('localhost', mgmt) }}"
+        url: "{{ custom_role_selflink }}"
         validate_certs: false
         timeout: 60
-      register: app_creator_role_json
+      register: custom_role_json
       delegate_to: localhost
 
-    - name: Debug app_creator_role_json
-      debug: var=app_creator_role_json
+    - name: Debug custom_role_json
+      debug: var=custom_role_json
 
     # Use below 4 tasks to modify just the devicePermitReferences list
     # Get existing devicePermitReferences list of the application creator role
     - name: Get existing devicePermitReferences list
       set_fact:
-        existing_device_permit_ref: "{{ app_creator_role_json.json.devicePermitReferences }}"
+        existing_device_permit_ref: "{{ custom_role_json.json.devicePermitReferences }}"
 
     - name: Debug existing_device_permit_ref
       debug: var=existing_device_permit_ref
@@ -113,25 +124,25 @@
     # # Get generation count for application creator role
     # - name: Get generation count for application creator role
     #   set_fact:
-    #     generation_count: "{{ app_creator_role_json.json.generation }}"
+    #     generation_count: "{{ custom_role_json.json.generation }}"
 
     # - name: Debug generation_count
     #   debug: var=generation_count
 
     # Replace existing devicePermitReferences list with new one including new BIG-IP
-    # Also remove the keys "generation" and "lastUpdateMicros" to prepare the body for PUT
+    # Also remove the keys "generation" and "lastUpdateMicros" to prepare the body for PUT (these will be automatically generated)
     - name: Replace existing devicePermitReferences with new one
       set_fact:
-        new_app_creator_role_json: "{{ app_creator_role_json.json | dict2items | rejectattr('key', 'search', 'generation') | rejectattr('key', 'search', 'lastUpdateMicros') | list | items2dict | combine({'devicePermitReferences': new_device_permit_ref }, recursive=True) }}"
+        new_custom_role_json: "{{ custom_role_json.json | dict2items | rejectattr('key', 'search', 'generation') | rejectattr('key', 'search', 'lastUpdateMicros') | list | items2dict | combine({'devicePermitReferences': new_device_permit_ref }, recursive=True) }}"
         
-    - name: Debug new_app_creator_role_json
-      debug: var=new_app_creator_role_json
+    - name: Debug new_custom_role_json
+      debug: var=new_custom_role_json
 
 
     #Update configuration of application creator role using the new config
     - name: Update existing role with new configuration that includes new BIG-IP
       uri:
-        body: "{{ new_app_creator_role_json }}"
+        body: "{{ new_custom_role_json }}"
         body_format: json
         headers:
           X-F5-Auth-Token: "{{ auth.json.token.token }}"
@@ -140,5 +151,5 @@
         url: "{{ custom_role_selflink }}"
         validate_certs: false
         timeout: 60
-      register: new_app_creator_role_json_result
+      register: new_custom_role_json_result
       delegate_to: localhost
