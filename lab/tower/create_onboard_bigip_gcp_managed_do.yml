@@ -13,6 +13,11 @@
     DO_URL: "https://github.com/F5Networks/f5-declarative-onboarding/releases/download/v1.9.0/f5-declarative-onboarding-1.9.0-1.noarch.rpm"
     TS_URL: "https://github.com/F5Networks/f5-telemetry-streaming/releases/download/v1.8.0/f5-telemetry-1.8.0-1.noarch.rpm"
     BIGIP_PASS: "{{ bigip_password }}"
+    # Below vars for galaxy role testing
+    atc_service: Device
+    atc_method: POST
+    atc_delay: 15
+    atc_retries: 40
 
   tasks:
     # First download galaxy roles for F5 ATC
@@ -151,23 +156,85 @@
       loop:
         - { src: "ltm", dest: "ltm", when: "ltm" }
         - { src: "asm", dest: "asm", when: "asm" }
+    
 
-    # Use DO to license, provision, and discover new BIG-IP on BIG-IQ
-    # Official galaxy role for F5 automation tool chain (https://galaxy.ansible.com/f5devcentral/atc_deploy)
-    - name: ATC POST
-      include_role:
-        name: f5devcentral.atc_deploy
-      vars: 
-        provider: "{{ provider_atc }}"
-        atc_service: Device
-        atc_method: POST
+    # Using the tasks from the galaxy role to test
+    - name: Setup provider and varables
+      set_fact:
+        provider: "{{ provider }}"
+        atc_declaration_url: "{{ atc_declaration_url|default(omit) }}"
         atc_declaration_file: "files/onboard_bigip_do_{{ item.atc_declaration_file }}.json"
-        atc_delay: 15
-        atc_retries: 40
-      when: "{{ requested_modules == item.when }}"
-      loop:
-        - { atc_declaration_file: "ltm", when: "ltm" }
-        - { atc_declaration_file: "asm", when: "asm" }
+        atc_tenant: "{{ as3_tenant|default(omit) }}"
+        atc_show: "{{ as3_show|default(omit) }}"
+        atc_show_hash: "{{ as3_showhash|default(false) }}"
+
+    - name: Set Automated Tool Chain service type from file
+      set_fact:
+        atc_service: "{{ (lookup('file', atc_declaration_file, errors='strict')| from_json).get('class') }}"
+      when: atc_declaration_file is defined and atc_service is undefined
+
+    - name: Set Automated Tool Chain metadata
+      set_fact:
+        toolchain_metadata: "{{ lookup('file', 'files/toolchain_metadata.json', errors='strict') }}"
+
+    - name: Setup service "{{ atc_service }}" endpoints
+      set_fact:
+        atc_url: "{{ toolchain_metadata['components'][atc_service]['endpoints']['configure']['uri'] }}"
+        atc_check_url: "{{ toolchain_metadata['components'][atc_service]['endpoints']['info']['uri'] }}"
+    
+    - name: include authentication.yaml
+      include_tasks: tasks/authentication.yaml
+
+    - name: Verify "{{ atc_service }}" service is available, and collect service info
+      uri:
+        url: "https://{{ provider.server }}:{{ provider.server_port }}{{ atc_check_url }}"
+        timeout: "{{ atc_timeout }}"
+        validate_certs: "{{ provider.validate_certs }}"
+        headers:
+          X-F5-Auth-Token: "{{ f5_auth_token }}"
+      register: atc_response
+      until:
+        - atc_response is success
+        - atc_response.json is defined
+      retries: "{{ atc_retries }}"
+      delay: "{{ atc_delay }}"
+
+    - name: include declare.yaml
+      include_tasks: declare.yaml
+
+    - name: Handle BIG-IQ token timeouts during BIG-IP onboarding
+      block:
+        - name: include atc_task_check.yaml
+          include_tasks: atc_task_check.yaml
+          when:
+            - atc_service == "AS3" or atc_service == "Device"
+      rescue:
+        - debug:
+            msg: "caught error: {{ atc_DO_status.json.message | lower }}"
+        - name: Re authenticate to BIG-IQ
+          include_tasks: tasks/authentication.yaml
+          when: "'invalid registered claims' in {{ atc_DO_status.json.message | lower }}"
+        - name: Redo atc_task_check.yaml
+          include_tasks: atc_task_check.yaml
+          when:
+            - atc_service == "AS3" or atc_service == "Device"
+
+    # # Use DO to license, provision, and discover new BIG-IP on BIG-IQ
+    # # Official galaxy role for F5 automation tool chain (https://galaxy.ansible.com/f5devcentral/atc_deploy)
+    # - name: ATC POST
+    #   include_role:
+    #     name: f5devcentral.atc_deploy
+    #   vars: 
+    #     provider: "{{ provider_atc }}"
+    #     atc_service: Device
+    #     atc_method: POST
+    #     atc_declaration_file: "files/onboard_bigip_do_{{ item.atc_declaration_file }}.json"
+    #     atc_delay: 15
+    #     atc_retries: 40
+    #   when: "{{ requested_modules == item.when }}"
+    #   loop:
+    #     - { atc_declaration_file: "ltm", when: "ltm" }
+    #     - { atc_declaration_file: "asm", when: "asm" }
 
 
     ######################################################################################
