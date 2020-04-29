@@ -32,7 +32,9 @@
     validate_certs: "{{ provider.validate_certs }}"
     status_code: 200
   register: atc_DO_status
-  until: atc_DO_status is success
+  until: 
+    - atc_DO_status is success
+    - atc_DO_status.json.message == "Invalid registered claims."
   retries: "{{ atc_retries }}"
   delay: "{{ atc_delay }}"
   delegate_to: localhost
