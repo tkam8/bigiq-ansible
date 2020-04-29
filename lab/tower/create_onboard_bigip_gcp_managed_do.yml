@@ -242,6 +242,22 @@
     # Below tasks are for adding the BIG-IP to an existing role resource group on BIG-IQ #
     ######################################################################################
 
+    - name: Authenticate to BIG-IQ
+      uri:
+        url: "https://{{ mgmt }}/mgmt/shared/authn/login"
+        method: POST
+        headers:
+          Content-Type: application/json
+        body:
+          username: "{{ bigiq_user }}"
+          password: "{{ bigiq_pass }}"
+          loginProviderName: local
+        body_format: json
+        timeout: 60
+        status_code: 200, 202
+        validate_certs: false
+      register: auth
+
     # Get BIG-IP's machineid which is used to build the devicePermit selfLink 
     # that's then used to append to the list of devices in an existing role's resource group
     - name: Get BIG-IP machineId
