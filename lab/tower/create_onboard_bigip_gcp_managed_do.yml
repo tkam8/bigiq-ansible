@@ -203,22 +203,10 @@
     - name: include declare.yaml
       include_tasks: tasks/declare.yaml
 
-    - name: Handle BIG-IQ token timeouts during BIG-IP onboarding
-      block:
-        - name: include atc_task_check.yaml
-          include_tasks: tasks/atc_task_check.yaml
-          when:
-            - atc_service == "AS3" or atc_service == "Device"
-      rescue:
-        - debug:
-            msg: "caught error: {{ atc_DO_status.json.message }}"
-        - name: Re authenticate to BIG-IQ
-          include_tasks: tasks/authentication.yaml
-          when: atc_DO_status.json.message == "Invalid registered claims."
-        - name: Redo atc_task_check.yaml
-          include_tasks: tasks/atc_task_check.yaml
-          when:
-            - atc_service == "AS3" or atc_service == "Device"
+    - name: include atc_task_check.yaml
+      include_tasks: atc_task_check.yaml
+      when:
+        - atc_service == "AS3" or atc_service == "Device"
 
     # # Use DO to license, provision, and discover new BIG-IP on BIG-IQ
     # # Official galaxy role for F5 automation tool chain (https://galaxy.ansible.com/f5devcentral/atc_deploy)
