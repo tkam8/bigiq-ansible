@@ -204,7 +204,7 @@
       include_tasks: tasks/declare.yaml
 
     - name: include atc_task_check.yaml
-      include_tasks: atc_task_check.yaml
+      include_tasks: tasks/atc_task_check.yaml
       when:
         - atc_service == "AS3" or atc_service == "Device"
 
