@@ -159,9 +159,9 @@
       debug:
         var:  bigip_device_permit_ref
 
-    - name: Debug bigip_device_permit_ref.link
+    - name: Debug bigip_device_permit_ref[0].link
       debug:
-        var:  bigip_device_permit_ref.link 
+        var:  bigip_device_permit_ref[0].link 
 
     # Get list of all App Creator Role selfLinks that contain the BIG-IP
     # Also handle cases where the devicePermitReferences list is null
