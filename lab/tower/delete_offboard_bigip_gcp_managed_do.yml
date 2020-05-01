@@ -151,10 +151,6 @@
       register: app_creator_role_list
       delegate_to: localhost
 
-    - name: Debug app_creator_role_list
-      debug:
-        var: app_creator_role_list
-
     # Get list of all App Creator Role selfLinks that contain the BIG-IP
     # Also handle cases where the devicePermitReferences list is null
     - name: Get all BIG-IQ Application Creator Role selfLink whose devicePermitReferences are not null
@@ -162,10 +158,6 @@
         debug_app_creator_role_selflinks: "{{ app_creator_role_list | json_query(query) }}"
       vars: 
         query: "json.items[?devicePermitReferences[0] != null]"
-
-    - name: Debug debug_app_creator_role_selflinks
-      debug:
-        var: debug_app_creator_role_selflinks
 
     # Get list of all App Creator Role selfLinks that contain the BIG-IP
     # Also handle cases where the devicePermitReferences list is null
@@ -175,19 +167,11 @@
       vars: 
         query: "json.items[?devicePermitReferences[0] != null] | [?devicePermitReferences[?link == '{{ bigip_device_permit_ref[0].link }}']].selfLink"
 
-    - name: Debug app_creator_role_selflinks
-      debug:
-        var: app_creator_role_selflinks
-
     # Add the BIG-IP mgmt IP to all the Application Creator Role selfLink (loop)
     - name: Add IP address to BIG-IQ Application Creator Role selfLink
       set_fact:
         custom_role_selflinks: "{{ item | regex_replace('localhost', mgmt) }}"
       loop: "{{ app_creator_role_selflinks }}"
-
-    - name: Debug custom_role_selflinks
-      debug:
-        var: custom_role_selflinks
 
     # Must remove the BIG-IP reference from the role to prevent ghost objects remaining
     - name: Remove BIG-IP devicePermit reference for every application creator role that has it

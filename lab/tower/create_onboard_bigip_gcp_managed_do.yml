@@ -45,9 +45,6 @@
         state: present
       register: gce_network
 
-    - name: Debug network
-      debug: var=gce_network
-
     - name: create a firewall
       gcp_compute_firewall:
         name: "{{ resource_prefix }}-network-fw"
@@ -78,9 +75,6 @@
           - https://www.googleapis.com/auth/compute
         state: present
       register: address
-
-    # - name: Debug address
-    #   debug: var=address
 
     - name: Set address as var
       set_fact:

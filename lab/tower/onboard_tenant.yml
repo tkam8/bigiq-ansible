@@ -9,27 +9,40 @@
     - set_fact:
         mgmt: "{{ hostvars[inventory_hostname]['mgmt_ip'] }}:{{ hostvars[inventory_hostname]['mgmt_port'] }}"
 
-    - name: Authenticate to BIG-IQ
-      uri:
-        url: "https://{{ mgmt }}/mgmt/shared/authn/login"
-        method: POST
-        headers:
-          Content-Type: application/json
-        body:
-          username: "{{ bigiq_user }}"
+    # - name: Authenticate to BIG-IQ
+    #   uri:
+    #     url: "https://{{ mgmt }}/mgmt/shared/authn/login"
+    #     method: POST
+    #     headers:
+    #       Content-Type: application/json
+    #     body:
+    #       username: "{{ bigiq_user }}"
+    #       password: "{{ bigiq_pass }}"
+    #       loginProviderName: local
+    #     body_format: json
+    #     timeout: 60
+    #     status_code: 200, 202
+    #     validate_certs: false
+    #   register: auth
+
+    # provider var for authentication task, using BIG-IQ
+    - name: Set connection provider for BIG-IQ tasks
+      set_fact:
+        provider_atc: 
+          server: "{{ hostvars[inventory_hostname]['mgmt_ip'] }}"
+          server_port: 443
+          user: "{{ bigiq_user }}"
           password: "{{ bigiq_pass }}"
-          loginProviderName: local
-        body_format: json
-        timeout: 60
-        status_code: 200, 202
-        validate_certs: false
-      register: auth
+          validate_certs: false
+
+    - name: include authentication.yml
+      include_tasks: tasks/authentication.yml
 
     # Confirm existing list of BIG-IQ users
     - name: Confirm existing BIG-IQ users 
       uri:
         headers:
-          X-F5-Auth-Token: "{{ auth.json.token.token }}"
+          X-F5-Auth-Token: "{{ f5_auth_token }}"
         method: GET
         status_code: 200,202
         url: "https://{{ mgmt }}/mgmt/shared/authz/users"
@@ -38,27 +51,18 @@
       register: user_list
       delegate_to: localhost
 
-    - debug:
-        var: user_list
-    
-    - debug:
-        var: user_name
-
     - name: Get BIG-IQ user
       set_fact:
         new_user_exists: "{{ user_list | json_query(query) | join(' ') }}"
       vars: 
         query: "json.items[?name=='{{ user_name }}'].name"
 
-    - debug:
-        var: new_user_exists 
-
     - name: Create a new user 
       uri:
         body: "{{ lookup('template', 'templates/user_create.j2') }}"
         body_format: json
         headers:
-          X-F5-Auth-Token: "{{ auth.json.token.token }}"
+          X-F5-Auth-Token: "{{ f5_auth_token }}"
         method: POST
         status_code: 200,202
         url: "https://{{ mgmt }}/mgmt/shared/authz/users"
@@ -72,7 +76,7 @@
     - name: Get all BIG-IQ roles
       uri:
         headers:
-          X-F5-Auth-Token: "{{ auth.json.token.token }}"
+          X-F5-Auth-Token: "{{ f5_auth_token }}"
         method: GET
         status_code: 200,202
         url: "https://{{ mgmt }}/mgmt/shared/authorization/roles"
@@ -80,7 +84,6 @@
         timeout: 60
       register: role_list
       delegate_to: localhost
-
 
     # Get Role selfLink based on name provided by user
     - name: Get BIG-IQ role selfLink
@@ -94,7 +97,7 @@
         body: "{{ lookup('template', 'templates/role_associate.j2') }}"
         body_format: json
         headers:
-          X-F5-Auth-Token: "{{ auth.json.token.token }}"
+          X-F5-Auth-Token: "{{ f5_auth_token }}"
         method: PATCH
         status_code: 200,202
         url: "{{ custom_role | regex_replace('localhost', mgmt) }}"
