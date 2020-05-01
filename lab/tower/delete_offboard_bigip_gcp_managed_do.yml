@@ -153,7 +153,7 @@
 
     - name: Debug app_creator_role_list
       debug:
-        var: "{{ app_creator_role_list | dict2items }}"
+        var: "{{ app_creator_role_list.json.items | dict2items }}"
 
     # Get list of all App Creator Role selfLinks that contain the BIG-IP
     # Also handle cases where the devicePermitReferences list is null
