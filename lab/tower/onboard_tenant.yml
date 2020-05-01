@@ -3,6 +3,8 @@
   hosts: bigiq
   connection: local
   gather_facts: false
+  vars:
+    atc_timeout: 120
 
   tasks:
 
