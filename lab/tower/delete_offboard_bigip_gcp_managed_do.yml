@@ -182,7 +182,7 @@
     # Add the BIG-IP mgmt IP to all the Application Creator Role selfLink (loop)
     - name: Add IP address to BIG-IQ Application Creator Role selfLink
       set_fact:
-        custom_role_selflinks: "{{ item | regex_replace('localhost', mgmt) | list }}"
+        custom_role_selflinks: "{{ item | regex_replace('localhost', mgmt) }}"
       loop: "{{ app_creator_role_selflinks }}"
 
     - name: Debug custom_role_selflinks
@@ -192,7 +192,7 @@
     # Must remove the BIG-IP reference from the role to prevent ghost objects remaining
     - name: Remove BIG-IP devicePermit reference for every application creator role that has it
       include_tasks: tasks/remove_device_permit.yaml
-      loop: "{{ custom_role_selflinks }}"
+      loop: "{{ custom_role_selflinks | list }}"
 
     #######################################################
     # Below tasks are for removing the BIG-IP from BIG-IQ #
