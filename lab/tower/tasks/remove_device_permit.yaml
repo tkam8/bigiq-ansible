@@ -7,7 +7,7 @@
       X-F5-Auth-Token: "{{ f5_auth_token }}"
     method: GET
     status_code: 200,202
-    url: "{{ item }}"
+    url: "{{ custom_role_selflinks }}"
     validate_certs: false
     timeout: 60
   register: custom_role_json
@@ -39,7 +39,7 @@
       X-F5-Auth-Token: "{{ f5_auth_token }}"
     method: PUT
     status_code: 200,202
-    url: "{{ item }}"
+    url: "{{ custom_role_selflinks }}"
     validate_certs: false
     timeout: 60
   register: new_custom_role_json_result
