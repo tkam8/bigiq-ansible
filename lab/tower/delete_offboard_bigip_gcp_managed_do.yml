@@ -79,8 +79,8 @@
         atc_url: "{{ toolchain_metadata['components'][atc_service]['endpoints']['configure']['uri'] }}"
         atc_check_url: "{{ toolchain_metadata['components'][atc_service]['endpoints']['info']['uri'] }}"
     
-    - name: include authentication.yaml
-      include_tasks: tasks/authentication.yaml
+    - name: include authentication.yml
+      include_tasks: tasks/authentication.yml
 
     - name: Verify "{{ atc_service }}" service is available, and collect service info
       uri:
@@ -96,11 +96,11 @@
       retries: "{{ atc_retries }}"
       delay: "{{ atc_delay }}"
 
-    - name: include declare.yaml
-      include_tasks: tasks/declare.yaml
+    - name: include declare.yml
+      include_tasks: tasks/declare.yml
 
-    - name: include atc_task_check.yaml
-      include_tasks: tasks/atc_task_check.yaml
+    - name: include atc_task_check.yml
+      include_tasks: tasks/atc_task_check.yml
       when:
         - atc_service == "AS3" or atc_service == "Device"
 
@@ -108,8 +108,8 @@
     # Below tasks are for removing the BIG-IP from BIG-IQ application creator roles #
     #################################################################################
 
-    - name: include authentication.yaml
-      include_tasks: tasks/authentication.yaml
+    - name: include authentication.yml
+      include_tasks: tasks/authentication.yml
 
     # Get BIG-IP's machineid which is used to build the devicePermit selfLink 
     - name: Get BIG-IP machineId
@@ -175,7 +175,7 @@
 
     # Must remove the BIG-IP reference from the role to prevent ghost objects remaining
     - name: Remove BIG-IP devicePermit reference for every application creator role that has it
-      include_tasks: tasks/remove_device_permit.yaml
+      include_tasks: tasks/remove_device_permit.yml
       # Remove loop for now, as it will not work with one element list, likely will only be one element for this use case
       #loop: "{{ custom_role_selflinks | list | join }}"
 

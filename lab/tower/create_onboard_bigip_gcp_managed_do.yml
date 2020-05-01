@@ -177,8 +177,8 @@
         atc_url: "{{ toolchain_metadata['components'][atc_service]['endpoints']['configure']['uri'] }}"
         atc_check_url: "{{ toolchain_metadata['components'][atc_service]['endpoints']['info']['uri'] }}"
     
-    - name: include authentication.yaml
-      include_tasks: tasks/authentication.yaml
+    - name: include authentication.yml
+      include_tasks: tasks/authentication.yml
 
     - name: Verify "{{ atc_service }}" service is available, and collect service info
       uri:
@@ -194,11 +194,11 @@
       retries: "{{ atc_retries }}"
       delay: "{{ atc_delay }}"
 
-    - name: include declare.yaml
-      include_tasks: tasks/declare.yaml
+    - name: include declare.yml
+      include_tasks: tasks/declare.yml
 
-    - name: include atc_task_check.yaml
-      include_tasks: tasks/atc_task_check.yaml
+    - name: include atc_task_check.yml
+      include_tasks: tasks/atc_task_check.yml
       when:
         - atc_service == "AS3" or atc_service == "Device"
 
@@ -224,8 +224,8 @@
     # Below tasks are for adding the BIG-IP to an existing role resource group on BIG-IQ #
     ######################################################################################
 
-    - name: include authentication.yaml
-      include_tasks: tasks/authentication.yaml
+    - name: include authentication.yml
+      include_tasks: tasks/authentication.yml
 
     # Get BIG-IP's machineid which is used to build the devicePermit selfLink 
     # that's then used to append to the list of devices in an existing role's resource group
