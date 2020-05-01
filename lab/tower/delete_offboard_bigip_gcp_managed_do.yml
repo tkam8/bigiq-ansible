@@ -153,15 +153,15 @@
 
     - name: Debug app_creator_role_list
       debug:
-        var: "{{ app_creator_role_list.json.items.devicePermitReferences | dict2items }}"
+        var: "{{ app_creator_role_list }}"
 
     # Get list of all App Creator Role selfLinks that contain the BIG-IP
     # Also handle cases where the devicePermitReferences list is null
     - name: Get all BIG-IQ Application Creator Role selfLink that contain the BIG-IP
       set_fact:
-        app_creator_role_selflinks: "{{ app_creator_role_list | dict2items | json_query(query) }}"
+        app_creator_role_selflinks: "{{ app_creator_role_list | json_query(query) }}"
       vars: 
-        query: "json.items[?devicePermitReferences != 'null'] | [?devicePermitReferences.contains(@, '{{ bigip_device_permit_ref }}')].selfLink"
+        query: "json.items[?devicePermitReferences != 'null'] | [?devicePermitReferences.link == '{{ bigip_device_permit_ref.link }}'].selfLink"
 
     - name: Debug app_creator_role_selflinks
       debug:
