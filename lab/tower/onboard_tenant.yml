@@ -35,6 +35,10 @@
           password: "{{ bigiq_pass }}"
           validate_certs: false
 
+    - name: Setup provider and varables
+      set_fact:
+        provider: "{{ provider_atc }}"
+
     - name: include authentication.yml
       include_tasks: tasks/authentication.yml
 
