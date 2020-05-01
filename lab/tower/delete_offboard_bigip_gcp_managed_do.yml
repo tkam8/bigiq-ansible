@@ -16,12 +16,12 @@
 
   tasks:
 
-    # First download galaxy roles for F5 ATC
-    - name: Install roles from Ansible Galaxy
-      command: ansible-galaxy install f5devcentral.atc_deploy -p ./roles/ 
+    # # First download galaxy roles for F5 ATC
+    # - name: Install roles from Ansible Galaxy
+    #   command: ansible-galaxy install f5devcentral.atc_deploy -p ./roles/ 
 
-    - name: show downloaded roles
-      command: ls ./roles/
+    # - name: show downloaded roles
+    #   command: ls ./roles/
 
     # Get the IP address of the Previously created BIG-IP instance
     - name: get IP Address of BIG-IP instance
@@ -104,27 +104,73 @@
       when:
         - atc_service == "AS3" or atc_service == "Device"
 
+    #################################################################################
+    # Below tasks are for removing the BIG-IP from BIG-IQ application creator roles #
+    #################################################################################
 
-    ########################################################
-    # Below tasks are for removing the BIG-IP from  BIG-IQ #
-    ########################################################
+    - name: include authentication.yaml
+      include_tasks: tasks/authentication.yaml
 
-    # Get authentication token for uri module tasks below
-    - name: Authenticate to BIG-IQ
+    # Get the machineID of the user specified BIG-IP
+    - name: Get the machineID of the user specified BIG-IP
+      set_fact:
+        machine_id: "{{ device_ref_query | json_query(query) | join(' ') }}"
+      vars: 
+        query: "json.items[?address=='{{ bigip_mgmt }}'].machineId"
+
+    # Use the machineId to create the BIG-IP devicePermit selfLink with key set as "link". 
+    # This is the format used in the role's devicePermitReferences list
+    - name: Create BIG-IP devicePermit selfLink 
+      set_fact:
+        bigip_device_permit_ref: 
+          - link: "https://{{ mgmt }}/mgmt/cm/shared/device-permits/{{ machine_id }}"
+
+    # Query for all application-creator-roles
+    - name: Get all application-creator-roles
       uri:
-        url: "https://{{ mgmt }}/mgmt/shared/authn/login"
-        method: POST
         headers:
-          Content-Type: application/json
-        body:
-          username: "{{ bigiq_user }}"
-          password: "{{ bigiq_pass }}"
-          loginProviderName: local
-        body_format: json
-        timeout: 60
-        status_code: 200, 202
+          X-F5-Auth-Token: "{{ f5_auth_token }}"
+        method: GET
+        status_code: 200,202
+        url: "https://{{ mgmt }}/mgmt/shared/authorization/application-creator-roles"
         validate_certs: false
-      register: auth
+        timeout: 60
+      register: app_creator_role_list
+      delegate_to: localhost
+
+    - name: Debug app_creator_role_list
+      debug:
+        var: app_creator_role_list
+
+    # Get list of all App Creator Role selfLinks that contain the BIG-IP 
+    - name: Get all BIG-IQ Application Creator Role selfLink that contain the BIG-IP
+      set_fact:
+        app_creator_role_selflinks: "{{ app_creator_role_list | json_query(query) }}"
+      vars: 
+        query: "json.items[?devicePermitReferences.link == '{{ bigip_device_permit_ref.link }} '].selfLink"
+
+    - name: Debug app_creator_role_selflinks
+      debug:
+        var: app_creator_role_selflinks
+
+    # Add the BIG-IP mgmt IP to all the Application Creator Role selfLink (loop)
+    - name: Add IP address to BIG-IQ Application Creator Role selfLink
+      set_fact:
+        custom_role_selflinks: "{{ item | regex_replace('localhost', mgmt) }}"
+      loop: "{{ app_creator_role_selflinks }}"
+
+    - name: Debug custom_role_selflinks
+      debug:
+        var: custom_role_selflinks
+
+    # Must remove the BIG-IP reference from the role to prevent ghost objects remaining
+    - name: Remove BIG-IP devicePermit reference for every application creator role that has it
+      include_tasks: tasks/remove_device_permit.yaml
+      loop: "{{ custom_role_selflinks }}"
+
+    #######################################################
+    # Below tasks are for removing the BIG-IP from BIG-IQ #
+    #######################################################
 
     # Completely removes BIG-IP from BIG-IQ
     - name: Remove discovered device and its config

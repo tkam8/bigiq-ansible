@@ -21,12 +21,12 @@
     atc_timeout: 120
 
   tasks:
-    # First download galaxy roles for F5 ATC
-    - name: Install roles from Ansible Galaxy
-      command: ansible-galaxy install f5devcentral.atc_deploy -p ./roles/ 
+    # # First download galaxy roles for F5 ATC
+    # - name: Install roles from Ansible Galaxy
+    #   command: ansible-galaxy install f5devcentral.atc_deploy -p ./roles/ 
 
-    - name: show downloaded roles
-      command: ls ./roles/
+    # - name: show downloaded roles
+    #   command: ls ./roles/
 
     ####################################################
     # Below tasks are for creating a new BIG-IP in GCP #
@@ -230,28 +230,15 @@
     # Below tasks are for adding the BIG-IP to an existing role resource group on BIG-IQ #
     ######################################################################################
 
-    - name: Authenticate to BIG-IQ
-      uri:
-        url: "https://{{ mgmt }}/mgmt/shared/authn/login"
-        method: POST
-        headers:
-          Content-Type: application/json
-        body:
-          username: "{{ bigiq_user }}"
-          password: "{{ bigiq_pass }}"
-          loginProviderName: local
-        body_format: json
-        timeout: 60
-        status_code: 200, 202
-        validate_certs: false
-      register: auth
+    - name: include authentication.yaml
+      include_tasks: tasks/authentication.yaml
 
     # Get BIG-IP's machineid which is used to build the devicePermit selfLink 
     # that's then used to append to the list of devices in an existing role's resource group
     - name: Get BIG-IP machineId
       uri:
         headers:
-          X-F5-Auth-Token: "{{ auth.json.token.token }}"
+          X-F5-Auth-Token: "{{ f5_auth_token }}"
         method: GET
         status_code: 200,202
         url: "https://{{ mgmt }}/mgmt/shared/resolver/device-groups/cm-bigip-allBigIpDevices/devices"
@@ -278,7 +265,7 @@
     - name: Get all application-creator-roles
       uri:
         headers:
-          X-F5-Auth-Token: "{{ auth.json.token.token }}"
+          X-F5-Auth-Token: "{{ f5_auth_token }}"
         method: GET
         status_code: 200,202
         url: "https://{{ mgmt }}/mgmt/shared/authorization/application-creator-roles"
@@ -302,7 +289,7 @@
     - name: Get Application Creator Role
       uri:
         headers:
-          X-F5-Auth-Token: "{{ auth.json.token.token }}"
+          X-F5-Auth-Token: "{{ f5_auth_token }}"
         method: GET
         status_code: 200,202
         url: "{{ custom_role_selflink }}"
@@ -322,14 +309,6 @@
       set_fact:
         new_device_permit_ref: "{{ existing_device_permit_ref + new_device_permit }}"
 
-    # # Get generation count for application creator role
-    # - name: Get generation count for application creator role
-    #   set_fact:
-    #     generation_count: "{{ custom_role_json.json.generation }}"
-
-    # - name: Debug generation_count
-    #   debug: var=generation_count
-
     # Replace existing devicePermitReferences list with new one including new BIG-IP
     # Also remove the keys "generation" and "lastUpdateMicros" to prepare the body for PUT (these will be automatically generated)
     - name: Replace existing devicePermitReferences with new one
@@ -342,7 +321,7 @@
         body: "{{ new_custom_role_json }}"
         body_format: json
         headers:
-          X-F5-Auth-Token: "{{ auth.json.token.token }}"
+          X-F5-Auth-Token: "{{ f5_auth_token }}"
         method: PUT
         status_code: 200,202
         url: "{{ custom_role_selflink }}"
