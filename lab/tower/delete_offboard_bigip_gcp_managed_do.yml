@@ -182,7 +182,7 @@
     # Add the BIG-IP mgmt IP to all the Application Creator Role selfLink (loop)
     - name: Add IP address to BIG-IQ Application Creator Role selfLink
       set_fact:
-        custom_role_selflinks: "{{ item | regex_replace('localhost', mgmt) }}"
+        custom_role_selflinks: "{{ item | regex_replace('localhost', mgmt) | list | join }}"
       loop: "{{ app_creator_role_selflinks }}"
 
     - name: Debug custom_role_selflinks
