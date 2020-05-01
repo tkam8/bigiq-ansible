@@ -160,7 +160,7 @@
       set_fact:
         app_creator_role_selflinks: "{{ app_creator_role_list | json_query(query) }}"
       vars: 
-        query: "json.items[?devicePermitReferences.contains(@, 'link')] | [?devicePermitReferences.link == '{{ bigip_device_permit_ref.link }} '].selfLink"
+        query: "json.items[?devicePermitReferences != 'null'] | [?devicePermitReferences.link == '{{ bigip_device_permit_ref.link }} '].selfLink"
 
     - name: Debug app_creator_role_selflinks
       debug:
