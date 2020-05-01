@@ -111,6 +111,19 @@
     - name: include authentication.yaml
       include_tasks: tasks/authentication.yaml
 
+    # Get BIG-IP's machineid which is used to build the devicePermit selfLink 
+    - name: Get BIG-IP machineId
+      uri:
+        headers:
+          X-F5-Auth-Token: "{{ f5_auth_token }}"
+        method: GET
+        status_code: 200,202
+        url: "https://{{ mgmt }}/mgmt/shared/resolver/device-groups/cm-bigip-allBigIpDevices/devices"
+        validate_certs: false
+        timeout: 60
+      register: device_ref_query
+      delegate_to: localhost
+
     # Get the machineID of the user specified BIG-IP
     - name: Get the machineID of the user specified BIG-IP
       set_fact:
@@ -123,7 +136,7 @@
     - name: Create BIG-IP devicePermit selfLink 
       set_fact:
         bigip_device_permit_ref: 
-          - link: "https://{{ mgmt }}/mgmt/cm/shared/device-permits/{{ machine_id }}"
+          - link: "https://localhost/mgmt/cm/shared/device-permits/{{ machine_id }}"
 
     # Query for all application-creator-roles
     - name: Get all application-creator-roles

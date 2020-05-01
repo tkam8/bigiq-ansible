@@ -50,7 +50,7 @@
   rescue:
     - fail:
         msg: Ended after 3 retries
-      when: retry_count|int == 3
+      when: retry_count|int == 5
     
     - debug:
         msg: "caught error: {{ atc_DO_status.json.message }}"

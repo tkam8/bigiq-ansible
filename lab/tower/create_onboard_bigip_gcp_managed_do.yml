@@ -259,7 +259,7 @@
     - name: Create new devicePermit selfLink 
       set_fact:
         new_device_permit: 
-          - link: "https://{{ mgmt }}/mgmt/cm/shared/device-permits/{{ machine_id }}"
+          - link: "https://localhost/mgmt/cm/shared/device-permits/{{ machine_id }}"
 
     # Query for all application-creator-roles
     - name: Get all application-creator-roles
